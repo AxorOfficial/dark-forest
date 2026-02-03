@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Dark forest</title>
+    <title>Ucieczka z Mrocznego Lasu - FINAL (CHAOS MODE)</title>
     <style>
         body { margin: 0; overflow: hidden; background: black; font-family: 'Courier New', Courier, monospace; color: white; user-select: none; }
         
@@ -41,15 +41,13 @@
 
     <div id="introWarning">
         <h1 style="color: red;">⚠️ OSTRZEŻENIE ⚠️</h1>
-        <p>Ta gra zawiera nagłe, głośne dźwięki oraz jumpscare'y (błyskające obrazy).</p>
-        <p>Nie zaleca się grania osobom z epilepsją lub chorobami serca.</p>
+        <p>Ta gra zawiera nagłe, głośne dźwięki oraz jumpscare'y.</p>
         <button id="acceptWarningBtn">CZY NA PEWNO CHCESZ WEJŚĆ?</button>
         <p style="margin-top: 20px; color: gray;">[Wciśnij ENTER aby pominąć intro]</p>
     </div>
 
     <div id="calibrationScreen">
         <h2>Krok 1: Kalibracja Dźwięku</h2>
-        <p>Gra wykorzystuje przestrzenny dźwięk 3D.</p>
         <p>Podkręć głośność w słuchawkach, aż usłyszysz ciche cykanie świerszczy...</p>
         <p style="margin-top: 30px; color: gray;">Kalibracja trwa: <span id="calibTimer">0</span>%</p>
         <p style="margin-top: 50px; color: #444;">[Wciśnij ENTER aby pominąć]</p>
@@ -60,7 +58,7 @@
 
     <div id="ui">
         <div class="ui-item">💰 Monety: <span id="coinCount">0</span>/250</div>
-        <div class="ui-item">🧩 Przyciski: <span id="btnCount">0</span>/3</div>
+        <div class="ui-item">🧩 Przyciski: <span id="btnCount">0</span>/6</div>
         <div id="buffsContainer">
             <div id="uiSpeed" class="buff-speed">⚡ Szybkość: <span id="speedTimeText">60</span>s</div>
             <div id="uiTracker" class="buff-tracker">👁️ Lokalizator: <span id="trackerTimeText">10</span>s</div>
@@ -72,7 +70,7 @@
 
     <div id="blocker">
         <div id="instructions">
-            <h1 id="mainTitle">Dark forest</h1>
+            <h1 id="mainTitle">Mroczny Las</h1>
             <p>Kliknij w tło, aby rozpocząć grę</p>
             <p style="font-size: 14px;">WSAD - Ruch | SHIFT - Sprint | SPACJA - Skok | E - Interakcja</p>
             <div id="secretInput">
@@ -147,7 +145,7 @@ function stopAllGameSounds() {
     let fakeJumpscare = document.getElementById('sndFakeJumpscare'); fakeJumpscare.pause(); fakeJumpscare.currentTime = 0;
 }
 
-// --- LOGIKA INTRO I SKIPOWANIE (ENTER) ---
+// --- LOGIKA INTRO ---
 let introFinished = false; let calibInterval = null; let calibTimeout1 = null; let calibTimeout2 = null;
 
 setTimeout(() => { const btn = document.getElementById('acceptWarningBtn'); btn.style.pointerEvents = "auto"; btn.style.opacity = "1"; }, 3000);
@@ -188,21 +186,72 @@ const controls = new THREE.PointerLockControls(camera, document.body);
 const blocker = document.getElementById('blocker'); const instructions = document.getElementById('instructions');
 const secretInputDiv = document.getElementById('secretInput'); secretInputDiv.addEventListener('click', function(event) { event.stopPropagation(); });
 
-// PANCERNY SYSTEM AUDIO
+// AUDIO
 const audioListener = new THREE.AudioListener(); camera.add(audioListener);
 const audioLoader = new THREE.AudioLoader(); 
 const ambientAudio = new THREE.Audio(audioListener);
 const nextbotAudio = new THREE.PositionalAudio(audioListener); 
 const agroAudio = new THREE.Audio(audioListener); 
 
-let isAmbientLoaded = false;
-let isBotAudioLoaded = false;
+let isAmbientLoaded = false; let isBotAudioLoaded = false;
 
-audioLoader.load(assets.ambientSound, function(buffer) { ambientAudio.setBuffer(buffer); ambientAudio.setLoop(true); ambientAudio.setVolume(0.15); isAmbientLoaded = true; }, undefined, function(err) { alert("BŁĄD: Nie znaleziono pliku " + assets.ambientSound); console.error(err); });
-audioLoader.load(assets.nextbotSound, function(buffer) { nextbotAudio.setBuffer(buffer); nextbotAudio.setRefDistance(20); nextbotAudio.setLoop(true); nextbotAudio.setVolume(1.0); isBotAudioLoaded = true; }, undefined, function(err) { alert("BŁĄD: Nie znaleziono pliku " + assets.nextbotSound); console.error(err); }); 
+audioLoader.load(assets.ambientSound, function(buffer) { ambientAudio.setBuffer(buffer); ambientAudio.setLoop(true); ambientAudio.setVolume(0.15); isAmbientLoaded = true; }, undefined, function(err) { alert("BŁĄD: Nie znaleziono pliku " + assets.ambientSound); });
+audioLoader.load(assets.nextbotSound, function(buffer) { nextbotAudio.setBuffer(buffer); nextbotAudio.setRefDistance(20); nextbotAudio.setLoop(true); nextbotAudio.setVolume(1.0); isBotAudioLoaded = true; }, undefined, function(err) { alert("BŁĄD: Nie znaleziono pliku " + assets.nextbotSound); }); 
 audioLoader.load(assets.agroSound, function(buffer) { agroAudio.setBuffer(buffer); agroAudio.setLoop(true); });
 
-// --- AGRESYWNE WYMUSZENIE AUDIO NA KLIKNIĘCIU GDZIEKOLWIEK ---
+// --- SYSTEM SEKRETÓW I CHAOS MODE ---
+let extraNextbots = []; // Tablica na klony
+
+function checkSecret() { 
+    const code = document.getElementById('secretCode').value; 
+    
+    // CHAOS MODE (EASTER EGG)
+    if (code === "...") {
+        isAggro = true; // Wszyscy wściekli
+        alert("⚠️ CHAOS MODE ACTIVATED: 10 NEXTBOTÓW! POWODZENIA... XD");
+        
+        // Spawnujemy 9 dodatkowych botów
+        for(let i=0; i<9; i++) {
+            let clone = nextbot.clone();
+            let rx = (Math.random() - 0.5) * 1000;
+            let rz = (Math.random() - 0.5) * 1000;
+            clone.position.set(rx, 0, rz);
+            scene.add(clone);
+            extraNextbots.push(clone);
+        }
+    }
+    // SECRET MODE (HARDCORE)
+    else if(code === "81ZJA") { 
+        isSecretMode = true; 
+        if(nextbotAudio.isPlaying) nextbotAudio.stop();
+        if(agroAudio.isPlaying) agroAudio.stop();
+        assets.nextbotImg = 'nextbot2.png'; 
+        assets.nextbotSound = 'nextbotsound2.mp3'; 
+        assets.agroSound = 'agro2.mp3'; 
+        
+        // Update głównego bota
+        textureLoader.load(assets.nextbotImg, function(tex) { 
+            nextbotMat.map = tex; 
+            let ar = tex.image.width / tex.image.height; 
+            nextbot.scale.set(6 * ar, 6, 1); 
+            // Update wszystkich klonów jeśli już istnieją
+            extraNextbots.forEach(clone => {
+               clone.material = nextbotMat;
+               clone.scale.set(6 * ar, 6, 1); 
+            });
+        }); 
+        
+        audioLoader.load(assets.nextbotSound, function(buffer) { 
+            nextbotAudio.setBuffer(buffer); 
+            nextbotAudio.setRefDistance(25); 
+            if(gameStarted) nextbotAudio.play(); 
+        }, undefined, function(err) { alert("Brak pliku " + assets.nextbotSound); }); 
+        
+        audioLoader.load(assets.agroSound, function(buffer) { agroAudio.setBuffer(buffer); }); 
+        alert("SECRET MODE ACTIVATED: DIFFICULTY EXTREME"); 
+    } 
+}
+
 document.addEventListener('click', function() {
     if(!introFinished) return;
     if (audioListener.context.state === 'suspended') audioListener.context.resume();
@@ -292,7 +341,19 @@ function addVegetation() {
 addVegetation();
 
 let coins = []; function addCoins() { const coinGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.1, 16); const coinMat = new THREE.MeshStandardMaterial({color: 0xffd700, metalness: 0.8, emissive: 0xffaa00, emissiveIntensity: 0.8}); for(let i=0; i<250; i++) { let coinGroup = new THREE.Group(); let coinMesh = new THREE.Mesh(coinGeo, coinMat); coinMesh.rotation.x = Math.PI/2; coinGroup.add(coinMesh); let x = (Math.random()-0.5)*1000; let z = (Math.random()-0.5)*1000; coinGroup.position.set(x, getTerrainHeight(x,z) + 1.0, z); coinGroup.name = "coin"; scene.add(coinGroup); interactables.push(coinGroup); coins.push(coinGroup); } } addCoins();
-function createButton(id) { const group = new THREE.Group(); const baseGeo = new THREE.BoxGeometry(0.8, 0.1, 0.8); const baseMat = new THREE.MeshStandardMaterial({color: 0x333333}); const base = new THREE.Mesh(baseGeo, baseMat); group.add(base); const btnGeo = new THREE.BoxGeometry(0.5, 0.2, 0.5); const btnMat = new THREE.MeshStandardMaterial({color: 0xff0000, emissive: 0x550000}); const btn = new THREE.Mesh(btnGeo, btnMat); btn.position.y = 0.15; group.add(btn); const light = new THREE.PointLight(0xff0000, 1, 3); light.position.y = 0.5; group.add(light); let x = (Math.random()-0.5)*1000; let z = (Math.random()-0.5)*1000; group.position.set(x, getTerrainHeight(x,z) + 0.05, z); group.name = "button" + id; scene.add(group); interactables.push(group); return group; } for(let i=1; i<=3; i++) createButton(i);
+
+// BUTTONS + BEACONS
+function createButton(id) { 
+    const group = new THREE.Group(); 
+    const baseGeo = new THREE.BoxGeometry(0.8, 0.1, 0.8); const baseMat = new THREE.MeshStandardMaterial({color: 0x333333}); const base = new THREE.Mesh(baseGeo, baseMat); group.add(base); 
+    const btnGeo = new THREE.BoxGeometry(0.5, 0.2, 0.5); const btnMat = new THREE.MeshStandardMaterial({color: 0xff0000, emissive: 0x550000}); const btn = new THREE.Mesh(btnGeo, btnMat); btn.position.y = 0.15; group.add(btn); 
+    const light = new THREE.PointLight(0xff0000, 1, 3); light.position.y = 0.5; group.add(light); 
+    const beamGeo = new THREE.CylinderGeometry(0.1, 0.1, 100, 8); const beamMat = new THREE.MeshBasicMaterial({ color: 0xff0000, opacity: 0.6, transparent: true });
+    const beam = new THREE.Mesh(beamGeo, beamMat); beam.position.y = 50; group.add(beam);
+    let x = (Math.random()-0.5)*1000; let z = (Math.random()-0.5)*1000; group.position.set(x, getTerrainHeight(x,z) + 0.05, z); group.name = "button" + id; scene.add(group); interactables.push(group); return group; 
+} 
+for(let i=1; i<=6; i++) createButton(i);
+
 const doorGeo = new THREE.BoxGeometry(2, 4, 0.2); const doorMat = new THREE.MeshStandardMaterial({color: 0xcccccc}); const door = new THREE.Mesh(doorGeo, doorMat); let doorX = 300, doorZ = 300; door.position.set(doorX, getTerrainHeight(doorX, doorZ) + 2, doorZ); door.visible = false; door.name = "door"; scene.add(door); interactables.push(door);
 
 const bodyGeo = new THREE.ConeGeometry(0.8, 2.5, 8); const bodyMat = new THREE.MeshStandardMaterial({color: 0x220044, roughness: 0.9}); 
@@ -309,12 +370,11 @@ for(let i=0; i<20; i++) {
     const torchPole = new THREE.Mesh(torchPoleGeo, torchPoleMat); torchPole.position.set(1.0, 0.75, 0); npcGroup.add(torchPole);
     const torchFire = new THREE.Mesh(torchFireGeo, torchFireMat); torchFire.position.set(1.0, 1.6, 0); npcGroup.add(torchFire);
     const torchLight = new THREE.PointLight(0xff00ff, 1.5, 15); torchLight.position.set(1.0, 1.6, 0); npcGroup.add(torchLight);
-
     let npcX = (Math.random()-0.5)*1000; let npcZ = (Math.random()-0.5)*1000; 
     npcGroup.position.set(npcX, getTerrainHeight(npcX, npcZ), npcZ); npcGroup.name = "npc"; scene.add(npcGroup); interactables.push(npcGroup);
 }
 
-// --- FIX BIAŁEGO EKRANU NEXTBOTA ---
+// NEXTBOT (GŁÓWNY)
 let nextbotMat = new THREE.SpriteMaterial({ color: 0xff0000 }); 
 let nextbot = new THREE.Sprite(nextbotMat); 
 nextbot.renderOrder = 999; 
@@ -379,43 +439,41 @@ function interact() {
     }
 }
 
-let osuInterval; let osuTimer; let osuNotes = []; let osuHits = 0; let osuTotal = 0;
+// --- OSU GAME ---
+let osuGameActive = false; let osuLastTime = 0; let osuNotes = []; let osuHits = 0; let osuTotal = 0; let osuTimeLeft = 15;
 
 function startOsuGame() { 
     controls.unlock(); isHiding = true; document.getElementById('osuOverlay').style.display = 'block'; 
     osuNotes = []; osuHits = 0; osuTotal = 0; osuLaneFlash = [0,0,0,0];
-    document.getElementById('osuAcc').innerText = "100"; const canvas = document.getElementById('osuCanvas'); const ctx = canvas.getContext('2d'); 
-    let timeLeft = 15; document.getElementById('osuTimerText').innerText = timeLeft; 
-    osuTimer = setInterval(() => { timeLeft--; document.getElementById('osuTimerText').innerText = timeLeft; if(timeLeft <= 0) { endOsuGame(); } }, 1000); 
-    
-    osuInterval = setInterval(() => { 
-        ctx.clearRect(0, 0, 400, 500); 
-        ctx.strokeStyle = '#444'; ctx.lineWidth = 2; 
-        for(let i=1; i<4; i++) { ctx.beginPath(); ctx.moveTo(i*100, 0); ctx.lineTo(i*100, 500); ctx.stroke(); } 
-        ctx.fillStyle = 'rgba(0, 255, 0, 0.2)'; ctx.fillRect(0, 400, 400, 50); 
+    document.getElementById('osuAcc').innerText = "100"; osuTimeLeft = 15; document.getElementById('osuTimerText').innerText = osuTimeLeft;
+    osuGameActive = true; osuLastTime = performance.now(); requestAnimationFrame(osuLoop);
+}
 
-        ctx.lineWidth = 4; ctx.strokeStyle = 'white';
-        for(let i=0; i<4; i++) {
-            if(osuLaneFlash[i] > 0) {
-                ctx.strokeRect(i * 100 + 2, 400, 96, 50);
-                osuLaneFlash[i]--; 
-            }
-        }
-
-        if(Math.random() < 0.15) { let lane = Math.floor(Math.random() * 4); osuNotes.push({lane: lane, y: -20, hit: false}); } 
-        for(let i = osuNotes.length - 1; i >= 0; i--) { 
-            let note = osuNotes[i]; note.y += 12; 
-            if(!note.hit) { ctx.fillStyle = 'red'; ctx.fillRect(note.lane * 100 + 10, note.y, 80, 20); } 
-            if(note.y > 500) { if(!note.hit) osuTotal++; osuNotes.splice(i, 1); updateOsuAccuracy(); } 
-        } 
-    }, 30); 
+function osuLoop(time) {
+    if (!osuGameActive) return;
+    let delta = (time - osuLastTime) / 1000; osuLastTime = time;
+    if (Math.floor(osuTimeLeft) > Math.floor(osuTimeLeft - delta)) document.getElementById('osuTimerText').innerText = Math.ceil(osuTimeLeft - delta);
+    osuTimeLeft -= delta; if (osuTimeLeft <= 0) { endOsuGame(); return; }
+    const canvas = document.getElementById('osuCanvas'); const ctx = canvas.getContext('2d'); 
+    ctx.clearRect(0, 0, 400, 500); 
+    ctx.strokeStyle = '#444'; ctx.lineWidth = 2; for(let i=1; i<4; i++) { ctx.beginPath(); ctx.moveTo(i*100, 0); ctx.lineTo(i*100, 500); ctx.stroke(); } 
+    ctx.fillStyle = 'rgba(0, 255, 0, 0.2)'; ctx.fillRect(0, 400, 400, 50); 
+    ctx.lineWidth = 4; ctx.strokeStyle = 'white'; for(let i=0; i<4; i++) { if(osuLaneFlash[i] > 0) { ctx.strokeRect(i * 100 + 2, 400, 96, 50); osuLaneFlash[i]--; } }
+    if(Math.random() < 2.5 * delta) { let lane = Math.floor(Math.random() * 4); osuNotes.push({lane: lane, y: -20, hit: false}); } 
+    const noteSpeed = 300; 
+    for(let i = osuNotes.length - 1; i >= 0; i--) { 
+        let note = osuNotes[i]; note.y += noteSpeed * delta; 
+        if(!note.hit) { ctx.fillStyle = 'red'; ctx.fillRect(note.lane * 100 + 10, note.y, 80, 20); } 
+        if(note.y > 500) { if(!note.hit) osuTotal++; osuNotes.splice(i, 1); updateOsuAccuracy(); } 
+    } 
+    requestAnimationFrame(osuLoop);
 }
 
 function handleOsuInput(lane) { for(let note of osuNotes) { if(note.lane === lane && !note.hit && note.y > 380 && note.y < 460) { note.hit = true; osuHits++; osuTotal++; updateOsuAccuracy(); return; } } }
 function updateOsuAccuracy() { if(osuTotal === 0) return; let acc = Math.round((osuHits / osuTotal) * 100); document.getElementById('osuAcc').innerText = acc; if(osuTotal > 10 && acc < 85) { endOsuGame(false); } }
 
 function endOsuGame(forcedFail = null) { 
-    clearInterval(osuInterval); clearInterval(osuTimer); document.getElementById('osuOverlay').style.display = 'none'; isHiding = false; 
+    osuGameActive = false; document.getElementById('osuOverlay').style.display = 'none'; isHiding = false; 
     moveForward = moveBackward = moveLeft = moveRight = isSprinting = false; velocity.set(0, 0, 0); controls.lock(); 
     let acc = osuTotal === 0 ? 100 : Math.round((osuHits / osuTotal) * 100); 
     if(forcedFail !== false && acc >= 85) { } else { bushCooldownTime = 180; document.getElementById('uiBushCD').style.display = 'block'; triggerAggro(); alert("Za dużo błędów! Narobiłeś hałasu w krzakach!"); } 
@@ -423,9 +481,40 @@ function endOsuGame(forcedFail = null) {
 
 let currentTimer; function triggerPuzzle(id, obj) { controls.unlock(); if(obj) { scene.remove(obj); } buttonsFound++; document.getElementById('btnCount').innerText = buttonsFound; if(buttonsFound === 3) door.visible = true; if(id === "1") { document.getElementById('puzzle1').style.display = 'block'; new Audio(assets.puzzle1Sound).play(); startTimer(1, 20); } else if(id === "2") { document.getElementById('puzzle2').style.display = 'block'; let vid = document.getElementById('puzzleVideo'); vid.src = assets.puzzle2Video; vid.play(); startTimer(2, 20); } else if(id === "3") { document.getElementById('puzzle3').style.display = 'block'; } } function startTimer(puzzleId, timeLimit) { let timeLeft = timeLimit; document.getElementById('timer'+puzzleId).innerText = timeLeft; currentTimer = setInterval(() => { timeLeft--; document.getElementById('timer'+puzzleId).innerText = timeLeft; if(timeLeft <= 0) { clearInterval(currentTimer); failPuzzle(puzzleId); } }, 1000); } function solvePuzzle1() { let ans = document.getElementById('ans1').value.toLowerCase(); clearInterval(currentTimer); document.getElementById('puzzle1').style.display = 'none'; controls.lock(); if(ans !== "supercalifragilisticexpialidocious") triggerAggro(); } function solvePuzzle2() { let ans = document.getElementById('ans2').value.toLowerCase(); clearInterval(currentTimer); document.getElementById('puzzleVideo').pause(); document.getElementById('puzzle2').style.display = 'none'; controls.lock(); if(ans !== "congregation") triggerAggro(); } function failPuzzle(id) { document.getElementById('puzzle'+id).style.display = 'none'; controls.lock(); triggerAggro(); } function triggerAggro() { isAggro = true; agroAudio.play(); setTimeout(() => { isAggro = false; agroAudio.stop(); }, 15000); }
 
-let gdInterval; let gdTimerInt; function startGD() { document.getElementById('startGdBtn').style.display = 'none'; document.getElementById('gdCanvas').style.display = 'block'; const canvas = document.getElementById('gdCanvas'); const ctx = canvas.getContext('2d'); clearInterval(gdInterval); clearInterval(gdTimerInt); let y = 150; let isHolding = false; let obstacles = []; let trail = []; canvas.onmousedown = () => isHolding = true; canvas.onmouseup = () => isHolding = false; let timeLeft = 10; document.getElementById('timer3').innerText = timeLeft; gdTimerInt = setInterval(() => { timeLeft--; document.getElementById('timer3').innerText = timeLeft; if(timeLeft <= 0) { clearInterval(gdInterval); clearInterval(gdTimerInt); document.getElementById('puzzle3').style.display = 'none'; controls.lock(); } }, 1000); const waveSpeed = 7; const obstacleSpeed = 8; const spawnRate = 0.07; gdInterval = setInterval(() => { ctx.clearRect(0,0,400,300); if(isHolding) y -= waveSpeed; else y += waveSpeed; const waveX = 57.5; const waveY = y + 7.5; trail.push({x: waveX, y: waveY}); if(trail.length > 12) trail.shift(); ctx.beginPath(); for(let i=0; i<trail.length; i++) { let point = trail[i]; let trailX = point.x - (trail.length - i) * (obstacleSpeed * 0.5); if(i === 0) ctx.moveTo(trailX, point.y); else ctx.lineTo(trailX, point.y); } ctx.strokeStyle = 'rgba(255, 255, 0, 0.4)'; ctx.lineWidth = 3; ctx.stroke(); ctx.save(); ctx.translate(waveX, waveY); ctx.rotate(isHolding ? -Math.PI/4 : Math.PI/4); ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.moveTo(-7.5, -7.5); ctx.lineTo(7.5, 0); ctx.lineTo(-7.5, 7.5); ctx.fill(); ctx.restore(); if (waveY <= 0 || waveY >= 300) { clearInterval(gdInterval); clearInterval(gdTimerInt); failPuzzle(3); return; } if(Math.random() < spawnRate) { let isTop = Math.random() < 0.5; let h = 50 + Math.random() * 110; obstacles.push({x: 400, y: isTop ? 0 : 300 - h, w: 25, h: h}); } ctx.fillStyle = 'red'; const hitRadius = 3; for(let i = obstacles.length - 1; i >= 0; i--) { let obs = obstacles[i]; obs.x -= obstacleSpeed; ctx.fillRect(obs.x, obs.y, obs.w, obs.h); if(waveX + hitRadius > obs.x && waveX - hitRadius < obs.x + obs.w && waveY + hitRadius > obs.y && waveY - hitRadius < obs.y + obs.h) { clearInterval(gdInterval); clearInterval(gdTimerInt); failPuzzle(3); return; } if(obs.x + obs.w < 0) obstacles.splice(i, 1); } }, 30); }
+// --- GD WAVE ---
+let gdGameActive = false; let gdLastTime = 0; let gdTimeLeft = 10; let gdY = 150; let gdIsHolding = false; let gdObstacles = []; let gdTrail = [];
 
-function closeShop() { document.getElementById('shop').style.display = 'none'; controls.lock(); } function buySpeed() { if(coinsCollected >= 10) { coinsCollected -= 10; document.getElementById('coinCount').innerText = coinsCollected; speedTimeLeft = 60; document.getElementById('uiSpeed').style.display = 'block'; closeShop(); } else { document.getElementById('shopWarning').style.display = 'block'; } } function buyTracker() { if(coinsCollected >= 10) { coinsCollected -= 10; document.getElementById('coinCount').innerText = coinsCollected; trackerTimeLeft = 10; nextbotMat.color.setHex(0xff0000); nextbotMat.depthTest = false; document.getElementById('uiTracker').style.display = 'block'; closeShop(); } else { document.getElementById('shopWarning').style.display = 'block'; } } function checkSecret() { const code = document.getElementById('secretCode').value; if(code === "81ZJA") { isSecretMode = true; assets.nextbotImg = 'nextbot2.png'; assets.nextbotSound = 'nextbotsound2.mp3'; assets.agroSound = 'agro2.mp3'; textureLoader.load(assets.nextbotImg, function(tex) { nextbotMat.map = tex; let ar = tex.image.width / tex.image.height; nextbot.scale.set(6 * ar, 6, 1); }); audioLoader.load(assets.nextbotSound, function(buffer) { nextbotAudio.setBuffer(buffer); if(gameStarted) nextbotAudio.play(); }); audioLoader.load(assets.agroSound, function(buffer) { agroAudio.setBuffer(buffer); }); alert("SECRET MODE ACTIVATED"); } } function showWarningText() { const d = document.createElement('div'); d.innerText = "Good luck..."; d.style.position = 'absolute'; d.style.color = 'red'; d.style.fontSize = '50px'; d.style.top = '100px'; d.style.left = '50%'; d.style.transform = 'translateX(-50%)'; d.style.zIndex = 100; document.body.appendChild(d); setTimeout(() => d.remove(), 3000); }
+function startGD() { 
+    document.getElementById('startGdBtn').style.display = 'none'; document.getElementById('gdCanvas').style.display = 'block'; const canvas = document.getElementById('gdCanvas'); 
+    gdGameActive = true; gdY = 150; gdIsHolding = false; gdObstacles = []; gdTrail = []; gdTimeLeft = 10; document.getElementById('timer3').innerText = gdTimeLeft;
+    canvas.onmousedown = () => gdIsHolding = true; canvas.onmouseup = () => gdIsHolding = false; 
+    gdLastTime = performance.now(); requestAnimationFrame(gdLoop);
+}
+
+function gdLoop(time) {
+    if (!gdGameActive) return;
+    let delta = (time - gdLastTime) / 1000; gdLastTime = time;
+    if (Math.floor(gdTimeLeft) > Math.floor(gdTimeLeft - delta)) document.getElementById('timer3').innerText = Math.ceil(gdTimeLeft - delta);
+    gdTimeLeft -= delta; if(gdTimeLeft <= 0) { gdGameActive = false; document.getElementById('puzzle3').style.display = 'none'; controls.lock(); return; }
+    const canvas = document.getElementById('gdCanvas'); const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,400,300); 
+    const waveSpeedY = 300 * delta; if(gdIsHolding) gdY -= waveSpeedY; else gdY += waveSpeedY; 
+    const waveX = 57.5; const waveY = gdY + 7.5; 
+    gdTrail.push({x: waveX, y: waveY}); if(gdTrail.length > 20) gdTrail.shift(); 
+    const obstacleSpeed = 350 * delta;
+    ctx.beginPath(); for(let i=0; i<gdTrail.length; i++) { let point = gdTrail[i]; let trailX = point.x - (gdTrail.length - i) * (obstacleSpeed * 0.05); if(i === 0) ctx.moveTo(trailX, point.y); else ctx.lineTo(trailX, point.y); } ctx.strokeStyle = 'rgba(255, 255, 0, 0.4)'; ctx.lineWidth = 3; ctx.stroke(); 
+    ctx.save(); ctx.translate(waveX, waveY); ctx.rotate(gdIsHolding ? -Math.PI/4 : Math.PI/4); ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.moveTo(-7.5, -7.5); ctx.lineTo(7.5, 0); ctx.lineTo(-7.5, 7.5); ctx.fill(); ctx.restore(); 
+    if (waveY <= 0 || waveY >= 300) { gdGameActive = false; failPuzzle(3); return; } 
+    if(Math.random() < 1.8 * delta) { let isTop = Math.random() < 0.5; let h = 50 + Math.random() * 110; gdObstacles.push({x: 400, y: isTop ? 0 : 300 - h, w: 25, h: h}); } 
+    ctx.fillStyle = 'red'; const hitRadius = 3; 
+    for(let i = gdObstacles.length - 1; i >= 0; i--) { 
+        let obs = gdObstacles[i]; obs.x -= obstacleSpeed; ctx.fillRect(obs.x, obs.y, obs.w, obs.h); 
+        if(waveX + hitRadius > obs.x && waveX - hitRadius < obs.x + obs.w && waveY + hitRadius > obs.y && waveY - hitRadius < obs.y + obs.h) { gdGameActive = false; failPuzzle(3); return; } 
+        if(obs.x + obs.w < 0) gdObstacles.splice(i, 1); 
+    } 
+    requestAnimationFrame(gdLoop);
+}
+
+function closeShop() { document.getElementById('shop').style.display = 'none'; controls.lock(); } function buySpeed() { if(coinsCollected >= 10) { coinsCollected -= 10; document.getElementById('coinCount').innerText = coinsCollected; speedTimeLeft = 60; document.getElementById('uiSpeed').style.display = 'block'; closeShop(); } else { document.getElementById('shopWarning').style.display = 'block'; } } function buyTracker() { if(coinsCollected >= 10) { coinsCollected -= 10; document.getElementById('coinCount').innerText = coinsCollected; trackerTimeLeft = 10; nextbotMat.color.setHex(0xff0000); nextbotMat.depthTest = false; document.getElementById('uiTracker').style.display = 'block'; closeShop(); } else { document.getElementById('shopWarning').style.display = 'block'; } } function showWarningText() { const d = document.createElement('div'); d.innerText = "Good luck..."; d.style.position = 'absolute'; d.style.color = 'red'; d.style.fontSize = '50px'; d.style.top = '100px'; d.style.left = '50%'; d.style.transform = 'translateX(-50%)'; d.style.zIndex = 100; document.body.appendChild(d); setTimeout(() => d.remove(), 3000); }
 
 function triggerRealJumpscare() { gameWon = false; controls.unlock(); stopAllGameSounds(); document.getElementById('gameJumpscare').style.display = 'block'; let realJumpscareSnd = document.getElementById('sndRealJumpscare'); realJumpscareSnd.volume = 1.0; let screamPromise = realJumpscareSnd.play(); if(screamPromise !== undefined) screamPromise.catch(e => console.warn("Brak dźwięku")); setTimeout(() => { document.getElementById('gameJumpscare').style.display = 'none'; document.getElementById('endTitle').innerText = "ZŁAPANY!"; document.getElementById('endSubtitle').innerText = "Nextbot cię dopadł."; document.getElementById('endScreen').style.display = 'block'; }, 2000); } function winGame() { gameWon = true; controls.unlock(); stopAllGameSounds(); document.getElementById('endScreen').style.display = 'block'; if(isSecretMode) { document.getElementById('endTitle').innerText = "SECRET ENDING"; document.getElementById('endSubtitle').innerText = "Przetrwałeś koszmar."; } }
 
@@ -440,13 +529,10 @@ function animate() {
         velocity.x -= velocity.x * 10.0 * delta; velocity.z -= velocity.z * 10.0 * delta;
         direction.z = Number(moveForward) - Number(moveBackward); direction.x = Number(moveRight) - Number(moveLeft); direction.normalize();
         
-        // ZWIĘKSZONA PRĘDKOŚĆ NEXTBOTA:
         let baseMove = isSprinting ? 55.0 : 35.0; let finalMoveSpeed = baseMove * speedMult; 
-        
         let moveX = 0; let moveZ = 0; 
         if (moveForward || moveBackward) moveZ = -direction.z * finalMoveSpeed * delta; 
         if (moveLeft || moveRight) moveX = -direction.x * finalMoveSpeed * delta; 
-        
         velocity.x += moveX; velocity.z += moveZ;
 
         let nextX = camera.position.x - velocity.x * delta; let nextZ = camera.position.z - velocity.z * delta; 
@@ -465,19 +551,35 @@ function animate() {
         let groundHeight = getTerrainHeight(camera.position.x, camera.position.z); let playerHeight = 1.6;
         if (camera.position.y < groundHeight + playerHeight) { camera.position.y = groundHeight + playerHeight; velocityY = 0; canJump = true; }
 
-        let botToPlayer = new THREE.Vector3().subVectors(camera.position, nextbot.position); botToPlayer.y = 0; botToPlayer.normalize();
+        // --- OBSŁUGA NEXTBOTA I JEGO KLONÓW ---
         
-        // ZMIANA: Zwiększona prędkość Nextbota (Zwykła z 3.2 na 4.0 | Wściekłość z 5.0 na 6.5)
-        let botSpeed = isAggro ? 6.5 : 4.0; 
+        let currentBaseSpeed = isSecretMode ? 14.0 : 8.0; 
+        let currentAgroSpeed = isSecretMode ? 30.0 : 17.0; 
+        let botSpeed = isAggro ? currentAgroSpeed : currentBaseSpeed; 
         
-        nextbot.position.addScaledVector(botToPlayer, botSpeed * delta);
-        nextbot.position.y = getTerrainHeight(nextbot.position.x, nextbot.position.z) + 2.2; 
+        // Funkcja ruchu dla bota
+        const moveBot = (bot) => {
+            let botToPlayer = new THREE.Vector3().subVectors(camera.position, bot.position); 
+            botToPlayer.y = 0; botToPlayer.normalize();
+            bot.position.addScaledVector(botToPlayer, botSpeed * delta);
+            bot.position.y = getTerrainHeight(bot.position.x, bot.position.z) + 2.2; 
+            if(bot.position.distanceTo(camera.position) < 2) { triggerRealJumpscare(); }
+        };
 
-        if(nextbot.position.distanceTo(camera.position) < 2) { triggerRealJumpscare(); }
+        // Ruch głównego bota
+        moveBot(nextbot);
+
+        // Ruch klonów (jeśli są)
+        extraNextbots.forEach(clone => moveBot(clone));
+
         coins.forEach(coinGroup => coinGroup.rotation.y += delta * 2);
     }
     
-    if (isHiding) { nextbot.position.y = getTerrainHeight(nextbot.position.x, nextbot.position.z) + 2.2; }
+    // Utrzymanie pozycji Y podczas chowania się
+    if (isHiding) { 
+        nextbot.position.y = getTerrainHeight(nextbot.position.x, nextbot.position.z) + 2.2; 
+        extraNextbots.forEach(clone => clone.position.y = getTerrainHeight(clone.position.x, clone.position.z) + 2.2);
+    }
 
     prevTime = time; renderer.render(scene, camera);
 }
