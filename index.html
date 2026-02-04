@@ -2,11 +2,20 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Mroczny Las - PC FINAL EDITION</title>
+    <title>Mroczny Las - DEV BUILD (TEST MENU)</title>
     <style>
         body { margin: 0; overflow: hidden; background: black; font-family: 'Courier New', Courier, monospace; color: white; user-select: none; }
         
-        /* INTRO & LOADING */
+        /* TEST MENU STYLES */
+        #debugMenu { display: none; position: absolute; top: 10px; right: 10px; width: 300px; background: rgba(0, 0, 0, 0.9); border: 2px solid lime; padding: 10px; z-index: 9999; max-height: 90vh; overflow-y: auto; font-size: 12px; }
+        #debugMenu h3 { color: lime; margin: 0 0 10px 0; text-align: center; border-bottom: 1px solid lime; padding-bottom: 5px; }
+        .dbg-section { margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .dbg-btn { width: 48%; background: #222; color: white; border: 1px solid #555; padding: 5px; margin: 2px 1%; cursor: pointer; }
+        .dbg-btn:hover { background: #444; border-color: lime; }
+        .dbg-btn-full { width: 98%; }
+        .dbg-label { color: #aaa; font-size: 10px; margin-top: 5px; display: block; }
+
+        /* STANDARD GAME STYLES */
         #introWarning { position: absolute; width: 100%; height: 100%; background: black; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         #acceptWarningBtn { pointer-events: none; opacity: 0; transition: opacity 1s; padding: 15px 30px; font-size: 20px; font-weight: bold; background: darkred; color: white; border: 2px solid red; cursor: pointer; border-radius: 5px; margin-top: 30px;}
         #acceptWarningBtn:hover { background: red; }
@@ -15,7 +24,6 @@
         #firstJumpscare { display: none; position: absolute; width: 100%; height: 100%; background: black; z-index: 2000; background-image: url('jumpscarefirst.gif'); background-size: contain; background-repeat: no-repeat; background-position: center; }
         #gameJumpscare { display: none; position: absolute; width: 100%; height: 100%; background: black; z-index: 2000; background-image: url('jumpscare.png'); background-size: contain; background-repeat: no-repeat; background-position: center; }
         
-        /* GAME UI */
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
         #instructions { font-size: 24px; cursor: pointer; text-align: center; padding: 20px; border: 1px solid #444; background: rgba(0,0,0,0.7); }
         
@@ -28,7 +36,6 @@
 
         #crosshair { position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; background: white; border-radius: 50%; transform: translate(-50%, -50%); z-index: 50; pointer-events: none; box-shadow: 0 0 4px white; }
         
-        /* INTERFACES */
         .overlay { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20, 20, 20, 0.95); padding: 30px; border: 2px solid white; z-index: 200; text-align: center; border-radius: 10px; min-width: 300px; }
         input[type="text"] { background: #111; color: white; border: 1px solid white; padding: 10px; font-size: 16px; width: 80%; cursor: text; margin-top: 10px; }
         button { background: white; color: black; border: none; padding: 10px 20px; font-size: 18px; cursor: pointer; margin-top: 15px; transition: 0.2s; }
@@ -41,17 +48,52 @@
 </head>
 <body>
 
+    <div id="debugMenu">
+        <h3>🛠️ TEST MENU (Dev)</h3>
+        <div class="dbg-section">
+            <span class="dbg-label">PLAYER</span>
+            <button class="dbg-btn" onclick="dbg_addCoins()">+50 Monet</button>
+            <button class="dbg-btn" onclick="dbg_toggleGod()">God Mode (TODO)</button>
+            <button class="dbg-btn" onclick="dbg_giveItems()">Daj Latarkę/Radar</button>
+            <button class="dbg-btn" onclick="buySpeed()">Daj Speed</button>
+        </div>
+        <div class="dbg-section">
+            <span class="dbg-label">NEXTBOT</span>
+            <button class="dbg-btn dbg-btn-full" onclick="dbg_toggleESP()" style="border-color: red; color: red;">👁️ TOGGLE ESP (Wallhack)</button>
+            <button class="dbg-btn" onclick="dbg_tpBotToMe()">TP Bot Tu</button>
+            <button class="dbg-btn" onclick="dbg_freezeBot()">Freeze Bot</button>
+            <button class="dbg-btn" onclick="dbg_forceAggro()">Force Aggro</button>
+            <button class="dbg-btn" onclick="checkSecret('FORCE')">Force Secret Mode</button>
+        </div>
+        <div class="dbg-section">
+            <span class="dbg-label">TELEPORT</span>
+            <button class="dbg-btn" onclick="dbg_tpToDoor()">TP do Drzwi</button>
+            <button class="dbg-btn" onclick="dbg_tpToShop()">TP do Sklepu</button>
+            <button class="dbg-btn" onclick="dbg_tpToSpawn()">TP Spawn</button>
+        </div>
+        <div class="dbg-section">
+            <span class="dbg-label">MINIGAMES / LOGIC</span>
+            <button class="dbg-btn" onclick="triggerPuzzle('1')">Start Zagadka 1</button>
+            <button class="dbg-btn" onclick="triggerPuzzle('2')">Start Zagadka 2</button>
+            <button class="dbg-btn" onclick="triggerPuzzle('3')">Start GD Wave</button>
+            <button class="dbg-btn" onclick="startOsuGame()">Start OSU!</button>
+            <button class="dbg-btn" onclick="winGame()">WYGRAJ GRĘ</button>
+            <button class="dbg-btn" onclick="triggerRealJumpscare()">PRZEGRAJ GRĘ</button>
+        </div>
+        <p style="text-align:center; color:gray;">Wciśnij [~] aby zamknąć</p>
+    </div>
+
     <div id="introWarning">
         <h1 style="color: red; font-size: 40px; text-shadow: 0 0 10px red;">⚠️ OSTRZEŻENIE ⚠️</h1>
-        <p>Gra zawiera nagłe, głośne dźwięki i obrazy.</p>
-        <button id="acceptWarningBtn">ROZUMIEM - WCHODZĘ</button>
-        <p style="margin-top: 20px; color: gray;">[PC ONLY: Myszka + Klawiatura]</p>
+        <p>Gra zawiera nagłe, głośne dźwięki.</p>
+        <button id="acceptWarningBtn">WEJDŹ (PC VERSION)</button>
+        <p style="margin-top: 20px; color: gray;">[Wciśnij ~ (Tylda) dla Test Menu]</p>
     </div>
 
     <div id="calibrationScreen">
         <h2>Kalibracja Dźwięku</h2>
-        <p>Podgłośnij słuchawki, aż usłyszysz ciche cykanie...</p>
-        <p style="margin-top: 30px; color: gray;">Generowanie lasu: <span id="calibTimer">0</span>%</p>
+        <p>Podgłośnij słuchawki...</p>
+        <p style="margin-top: 30px; color: gray;">Generowanie: <span id="calibTimer">0</span>%</p>
     </div>
 
     <div id="firstJumpscare"></div>
@@ -62,7 +104,7 @@
         <div class="ui-item">🧩 Przyciski: <span id="btnCount">0</span>/3</div>
         <div id="buffsContainer">
             <div id="uiSpeed" class="buff-speed">⚡ Szybkość: <span id="speedTimeText">60</span>s</div>
-            <div id="uiTracker" class="buff-tracker">👁️ Lokalizator: <span id="trackerTimeText">10</span>s</div>
+            <div id="uiTracker" class="buff-tracker">👁️ Radar: <span id="trackerTimeText">10</span>s</div>
             <div id="uiBushCD" class="debuff-bush">🚫 Krzaki Zablokowane: <span id="bushTimeText">180</span>s</div>
         </div>
     </div>
@@ -76,7 +118,7 @@
             <p style="font-size: 14px; color: #bbb;">WSAD - Ruch | SHIFT - Sprint | SPACJA - Skok | E - Interakcja</p>
             <div id="secretInput">
                 <p>Tajny Kod:</p>
-                <input type="text" id="secretCode" placeholder="???" maxlength="5">
+                <input type="text" id="secretCodeInput" placeholder="???" maxlength="5">
                 <button onclick="checkSecret()">Zastosuj</button>
             </div>
         </div>
@@ -85,13 +127,7 @@
     <div id="puzzle1" class="overlay"><h2>Zagadka #1</h2><p>Masz 20 sekund! Posłuchaj.</p><input type="text" id="ans1" placeholder="Odpowiedź..."><button onclick="solvePuzzle1()">Zatwierdź</button><p id="timer1" style="color: red;">20</p></div>
     <div id="puzzle2" class="overlay"><h2>Zagadka #2</h2><p>Co to za poziom?</p><video id="puzzleVideo" width="300" height="200" controls></video><input type="text" id="ans2" placeholder="Odpowiedź..."><button onclick="solvePuzzle2()">Zatwierdź</button><p id="timer2" style="color: red;">20</p></div>
     <div id="puzzle3" class="overlay"><h2>Zagadka #3 - Wave</h2><p>Trzymaj lewy przycisk myszy!</p><canvas id="gdCanvas" width="400" height="300"></canvas><button id="startGdBtn" onclick="startGD()">Start</button><p id="timer3" style="color: red;"></p></div>
-    
-    <div id="osuOverlay" class="overlay">
-        <h2 style="color: lime;">🤫 UKRYWASZ SIĘ 🤫</h2>
-        <p style="font-size: 14px;">Trafiaj w nuty (Klawisze: D F J K)</p>
-        <p>Celność: <span id="osuAcc">100</span>% (Min. 85%)</p>
-        <canvas id="osuCanvas" width="400" height="500"></canvas>
-    </div>
+    <div id="osuOverlay" class="overlay"><h2 style="color: lime;">🤫 UKRYWASZ SIĘ 🤫</h2><p>Klawisze: D F J K</p><p>Celność: <span id="osuAcc">100</span>%</p><canvas id="osuCanvas" width="400" height="500"></canvas></div>
 
     <div id="shop" class="overlay">
         <h2>Wędrowiec</h2>
@@ -117,13 +153,49 @@
 
 <script>
 // --- KONFIGURACJA PC ---
-const TREES_COUNT = 13000; // Gęsty las dla PC
+const TREES_COUNT = 13000;
 const MAP_SIZE = 1200;
-
-// Generowanie losowego kodu na tę sesję (4 znaki)
 const SESSION_CODE = Math.random().toString(36).substring(2, 6).toUpperCase();
-console.log("Debug Code:", SESSION_CODE); // Podgląd w konsoli
+console.log("Secret Code:", SESSION_CODE);
 
+// --- DEBUG / TEST MENU FUNCTIONS ---
+let debugESP = false;
+let espMesh = null;
+let botFrozen = false;
+
+function toggleDebugMenu() {
+    const m = document.getElementById('debugMenu');
+    m.style.display = m.style.display === 'block' ? 'none' : 'block';
+    if(m.style.display === 'block') document.exitPointerLock();
+}
+
+function dbg_addCoins() { coinsCollected += 50; document.getElementById('coinCount').innerText = coinsCollected; }
+function dbg_toggleESP() { 
+    debugESP = !debugESP; 
+    if(debugESP) {
+        // Create ESP Mesh
+        const geo = new THREE.SphereGeometry(3, 8, 8);
+        const mat = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true, depthTest: false, depthWrite: false });
+        espMesh = new THREE.Mesh(geo, mat);
+        espMesh.renderOrder = 9999;
+        scene.add(espMesh);
+    } else {
+        if(espMesh) scene.remove(espMesh);
+    }
+}
+function dbg_tpBotToMe() { nextbot.position.copy(camera.position); nextbot.position.z -= 5; }
+function dbg_freezeBot() { botFrozen = !botFrozen; alert("Bot Frozen: " + botFrozen); }
+function dbg_forceAggro() { isAggro = true; agroAudio.play(); }
+function dbg_tpToDoor() { camera.position.set(300, 10, 300); }
+function dbg_tpToShop() { 
+    // Find first shop
+    const shop = scene.getObjectByName("npc");
+    if(shop) camera.position.set(shop.position.x, shop.position.y+2, shop.position.z+2);
+}
+function dbg_tpToSpawn() { camera.position.set(0, 5, 0); velocity.set(0,0,0); }
+function dbg_giveItems() { hasFlashlight=true; flashlightSpot.intensity=2.5; buyTracker(); }
+
+// --- ENGINE START ---
 function stopAllGameSounds() {
     if(ambientAudio && ambientAudio.isPlaying) ambientAudio.stop();
     if(nextbotAudio && nextbotAudio.isPlaying) nextbotAudio.stop();
@@ -132,7 +204,6 @@ function stopAllGameSounds() {
     document.getElementById('sndFakeJumpscare').pause();
 }
 
-// --- INTRO ---
 let introFinished = false; let calibInterval, calibTimeout1, calibTimeout2;
 
 setTimeout(() => { const btn = document.getElementById('acceptWarningBtn'); btn.style.pointerEvents = "auto"; btn.style.opacity = "1"; }, 2000);
@@ -144,7 +215,10 @@ function skipIntro() {
     document.getElementById('introWarning').style.display = 'none'; document.getElementById('calibrationScreen').style.display = 'none'; document.getElementById('firstJumpscare').style.display = 'none'; document.getElementById('blocker').style.display = 'flex';
     introFinished = true; animate(); 
 }
-window.addEventListener('keydown', function(e) { if (e.code === 'Enter' && !introFinished) skipIntro(); });
+window.addEventListener('keydown', function(e) { 
+    if (e.code === 'Enter' && !introFinished) skipIntro(); 
+    if (e.code === 'Backquote') toggleDebugMenu(); // TYLDA OTWIERA MENU
+});
 
 function startCalibration() {
     document.getElementById('calibrationScreen').style.display = 'flex';
@@ -159,7 +233,7 @@ function startCalibration() {
     }, 15000); 
 }
 
-// --- GLOBALNE ZMIENNE ---
+// --- GLOBALS ---
 let isSecretMode = false; let gameWon = false; let hasFlashlight = false; let flashlightSpot;
 let buttonsFound = 0; let coinsCollected = 0; let isAggro = false; let nextbotTrackerActive = false;
 let gameStarted = false; let speedTimeLeft = 0; let trackerTimeLeft = 0; let speedMult = 1.0; 
@@ -169,14 +243,12 @@ const gridCellSize = 20; const treeCollisionGrid = {}; function getGridKey(x, z)
 
 let assets = { nextbotImg: 'nextbot.jpg', nextbotSound: 'nextbotsound.mp3', agroSound: 'agro.mp3', puzzle1Sound: 'zagadka1.mp3', puzzle2Video: 'wideo.mp4', ambientSound: 'ambient.mp3' };
 
-// THREE.JS SETUP
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x000000); scene.fog = new THREE.FogExp2(0x000000, 0.035);
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 300); camera.position.y = 1.5;
 const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.shadowMap.enabled = true; document.body.appendChild(renderer.domElement);
 const controls = new THREE.PointerLockControls(camera, document.body);
 const blocker = document.getElementById('blocker'); const instructions = document.getElementById('instructions');
 
-// AUDIO SYSTEM
 const audioListener = new THREE.AudioListener(); camera.add(audioListener);
 const audioLoader = new THREE.AudioLoader(); 
 const ambientAudio = new THREE.Audio(audioListener);
@@ -194,7 +266,6 @@ audioLoader.load(assets.nextbotSound, (b)=>{
 }); 
 audioLoader.load(assets.agroSound, (b)=>{ agroAudio.setBuffer(b); agroAudio.setLoop(true); });
 
-// START GRY
 instructions.addEventListener('click', function () { if(introFinished && !isHiding) { controls.lock(); } });
 controls.addEventListener('lock', function () { 
     blocker.style.display = 'none'; 
@@ -202,16 +273,14 @@ controls.addEventListener('lock', function () {
     gameStarted = true; 
     if(audioListener.context.state === 'suspended') audioListener.context.resume();
     if(isAmbientLoaded && !ambientAudio.isPlaying) ambientAudio.play();
-    // Bot audio startuje z botem
 });
 controls.addEventListener('unlock', function () { 
-    if(!gameWon && introFinished && !isHiding && document.getElementById('puzzle1').style.display !== 'block' && document.getElementById('shop').style.display !== 'block') { blocker.style.display = 'flex'; } 
+    if(!gameWon && introFinished && !isHiding && document.getElementById('puzzle1').style.display !== 'block' && document.getElementById('shop').style.display !== 'block' && document.getElementById('debugMenu').style.display !== 'block') { blocker.style.display = 'flex'; } 
 });
 
 function createTextSprite(msg) { const c=document.createElement('canvas'); const x=c.getContext('2d'); c.width=512; c.height=128; x.font="Bold 60px Courier New"; x.fillStyle="white"; x.textAlign="center"; x.fillText(msg,256,64); const t=new THREE.CanvasTexture(c); const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t})); s.scale.set(3,0.75,1); return s; }
 function getTerrainHeight(x, z) { return Math.sin(x/10)*Math.cos(z/10)*2; }
 
-// TEREN I ŚWIATŁO
 const textureLoader = new THREE.TextureLoader(); const floorTexture = textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg'); floorTexture.wrapS=floorTexture.wrapT=THREE.RepeatWrapping; floorTexture.repeat.set(100,100);
 const terrainGeo = new THREE.PlaneGeometry(MAP_SIZE, MAP_SIZE, 200, 200); const posAttr = terrainGeo.attributes.position;
 for(let i=0; i<posAttr.count; i++) posAttr.setZ(i, getTerrainHeight(posAttr.getX(i), posAttr.getY(i)));
@@ -220,14 +289,10 @@ terrainGeo.computeVertexNormals(); const terrain = new THREE.Mesh(terrainGeo, ne
 const ambientLight = new THREE.AmbientLight(0x010101); scene.add(ambientLight);
 flashlightSpot = new THREE.SpotLight(0xffffff, 0, 40, Math.PI/5, 0.3, 1); flashlightSpot.position.set(0,0,0); flashlightSpot.target.position.set(0,0,-1); camera.add(flashlightSpot); camera.add(flashlightSpot.target); scene.add(camera);
 
-// --- OBIEKTY ŚWIATA ---
 const interactables = [];
-
-// LATARKA
 const flashGroup = new THREE.Group(); const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.25), new THREE.MeshStandardMaterial({color:0x222222})); handle.rotation.x=Math.PI/2; const head = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.05,0.1), new THREE.MeshStandardMaterial({color:0x888888})); head.rotation.x=Math.PI/2; head.position.z=-0.15; flashGroup.add(handle); flashGroup.add(head); flashGroup.add(createTextSprite("Latarka [E]"));
 flashGroup.position.set(2, getTerrainHeight(2,-2)+0.05, -2); flashGroup.name="flashlight"; scene.add(flashGroup); interactables.push(flashGroup);
 
-// ROŚLINNOŚĆ
 function addVegetation() {
     const iTrunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.4, 0.6, 6, 8), new THREE.MeshStandardMaterial({color:0x1a0f00}), TREES_COUNT);
     const iLeaf = new THREE.InstancedMesh(new THREE.ConeGeometry(2.5, 6, 8), new THREE.MeshStandardMaterial({color:0x001a00}), TREES_COUNT);
@@ -254,64 +319,54 @@ function addVegetation() {
 }
 addVegetation();
 
-// 3 PRZYCISKI (Z POŚWIATĄ)
+// PRZYCISKI Z POŚWIATĄ
 function createButton(id) { 
     const g = new THREE.Group(); 
     g.add(new THREE.Mesh(new THREE.BoxGeometry(0.8,0.1,0.8), new THREE.MeshStandardMaterial({color:0x333333})));
     const btn = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.2,0.5), new THREE.MeshStandardMaterial({color:0xff0000, emissive:0x550000})); btn.position.y=0.15; g.add(btn);
-    const glow = new THREE.PointLight(0xff0000, 2, 30); glow.position.y=0.5; g.add(glow); // Zasięg 30m
-    
+    const glow = new THREE.PointLight(0xff0000, 2, 40); glow.position.y=0.5; g.add(glow); 
     let x=(Math.random()-0.5)*1000; let z=(Math.random()-0.5)*1000;
     g.position.set(x, getTerrainHeight(x,z)+0.05, z); g.name="button"+id; scene.add(g); interactables.push(g);
 } 
 for(let i=1; i<=3; i++) createButton(i);
 
-// 15 SKLEPIKARZY + FIOLETOWE POCHODNIE
+// 15 SKLEPIKARZY + FIOLET POCHODNIE
 const npcGeo = new THREE.ConeGeometry(0.8, 2.5, 8); const npcMat = new THREE.MeshStandardMaterial({color:0x220044});
 for(let i=0; i<15; i++) { 
     const g = new THREE.Group(); 
     const body = new THREE.Mesh(npcGeo, npcMat); body.position.y=1.25; g.add(body); 
     const head = new THREE.Mesh(new THREE.SphereGeometry(0.5), new THREE.MeshStandardMaterial({color:0x110022})); head.position.y=2.5; g.add(head); 
     let l = createTextSprite("Sklep [E]"); l.position.y=3.5; g.add(l); 
-    
-    // FIOLETOWA POCHODNIA
     const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,1.5), new THREE.MeshStandardMaterial({color:0x553311})); stick.position.set(1,0.75,0); g.add(stick);
     const fire = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshStandardMaterial({color:0xff00ff, emissive:0xff00ff})); fire.position.set(1,1.6,0); g.add(fire);
     const light = new THREE.PointLight(0xff00ff, 1.5, 20); light.position.set(1,1.6,0); g.add(light);
-
     let x=(Math.random()-0.5)*1000; let z=(Math.random()-0.5)*1000; g.position.set(x, getTerrainHeight(x,z), z); g.name="npc"; scene.add(g); interactables.push(g);
 }
 
-// SEKRETNE DRZEWO
 const secretTree = new THREE.Group();
 secretTree.add(new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.6,6,8), new THREE.MeshStandardMaterial({color:0x1a0f00})));
 const paper = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.4,0.05), new THREE.MeshStandardMaterial({color:0xffffff})); paper.position.set(0,2.5,0.45); secretTree.add(paper);
 let sx=(Math.random()-0.5)*900; let sz=(Math.random()-0.5)*900; secretTree.position.set(sx, getTerrainHeight(sx,sz)+2.5, sz); secretTree.name="secretTree"; scene.add(secretTree); interactables.push(secretTree);
 
-// DRZWI WYJŚCIA
 const door = new THREE.Mesh(new THREE.BoxGeometry(2,4,0.2), new THREE.MeshStandardMaterial({color:0xcccccc})); door.position.set(300, getTerrainHeight(300,300)+2, 300); door.visible=false; door.name="door"; scene.add(door); interactables.push(door);
 
-// MONETY
 let coins = []; const coinGeo = new THREE.CylinderGeometry(0.3,0.3,0.1,16); const coinMat = new THREE.MeshStandardMaterial({color:0xffd700, emissive:0xffaa00});
 for(let i=0; i<250; i++) { let g=new THREE.Group(); let m=new THREE.Mesh(coinGeo, coinMat); m.rotation.x=Math.PI/2; g.add(m); let x=(Math.random()-0.5)*1000; let z=(Math.random()-0.5)*1000; g.position.set(x, getTerrainHeight(x,z)+1, z); g.name="coin"; scene.add(g); interactables.push(g); coins.push(g); }
 
-// NEXTBOT
 let nextbotMat = new THREE.SpriteMaterial({ color: 0xff0000 }); 
 let nextbot = new THREE.Sprite(nextbotMat); 
 nextbot.renderOrder = 999; 
 nextbot.scale.set(6, 6, 1); 
 nextbot.position.set(250, 0, 250); 
 scene.add(nextbot);
-nextbot.add(nextbotAudio); // Dźwięk podpięty do bota
+nextbot.add(nextbotAudio); 
 
 textureLoader.load(assets.nextbotImg, function(t) { nextbotMat.map=t; nextbotMat.color.setHex(0xffffff); let ar=t.image.width/t.image.height; nextbot.scale.set(6*ar, 6, 1); }, undefined, function(e){alert("Brak pliku nextbot.jpg!");});
 
-// --- LOGIKA GRY ---
-function checkSecret() { 
-    const code = document.getElementById('secretCode').value.toUpperCase(); 
-    if(code === SESSION_CODE) { 
+function checkSecret(force = null) { 
+    const code = document.getElementById('secretCodeInput').value.toUpperCase(); 
+    if(code === SESSION_CODE || force === 'FORCE') { 
         isSecretMode = true; 
-        // Zmiana assetów na wersję secret
         assets.nextbotImg = 'nextbot2.png'; assets.nextbotSound = 'nextbotsound2.mp3'; assets.agroSound = 'agro2.mp3';
         textureLoader.load(assets.nextbotImg, (t)=>{nextbotMat.map=t;});
         audioLoader.load(assets.nextbotSound, (b)=>{nextbotAudio.setBuffer(b); if(gameStarted)nextbotAudio.play();});
@@ -349,7 +404,6 @@ function interact() {
     }
 }
 
-// MINIGRY
 let osuActive=false, osuTime=15, osuNotes=[], osuHits=0, osuTotal=0;
 function startOsuGame(){ controls.unlock(); isHiding=true; document.getElementById('osuOverlay').style.display='block'; osuNotes=[]; osuHits=0; osuTotal=0; osuTime=15; osuActive=true; requestAnimationFrame(osuLoop); }
 function osuLoop(t){ if(!osuActive)return; osuTime-=0.016; if(osuTime<=0)endOsu(); 
@@ -407,21 +461,16 @@ function animate() {
         let trees = treeCollisionGrid[k] || [];
         for(let t of trees) { let dx=camera.position.x-t.x; let dz=camera.position.z-t.z; let d=Math.sqrt(dx*dx+dz*dz); if(d<t.r){let p=(t.r-d)/d; camera.position.x+=dx*p; camera.position.z+=dz*p;} }
 
-        let bs = isAggro ? (isSecretMode?30:10) : (isSecretMode?14:4.5);
-        const mb = (b) => { 
-            let d = new THREE.Vector3().subVectors(camera.position, b.position); d.y=0; d.normalize(); 
-            b.position.addScaledVector(d, bs * delta); 
-            b.position.y = getTerrainHeight(b.position.x, b.position.z) + 2.2; 
-            if(b.position.distanceTo(camera.position) < 2) triggerRealJumpscare(); 
-        };
-        mb(nextbot); 
-        
-        // Audio 3D update
-        if(gameStarted && isBotAudioLoaded) {
-            // NextbotAudio jest "Positional", więc Three.js sam aktualizuje głośność na podstawie odległości
-            // Ale musimy upewnić się, że nie jest zapauzowane
-            if(!nextbotAudio.isPlaying) nextbotAudio.play();
+        if(!botFrozen) {
+            let bs = isAggro ? (isSecretMode?30:10) : (isSecretMode?14:4.5);
+            let vec = new THREE.Vector3().subVectors(camera.position, nextbot.position); vec.y=0; vec.normalize();
+            nextbot.position.addScaledVector(vec, bs*delta);
+            nextbot.position.y = getTerrainHeight(nextbot.position.x, nextbot.position.z) + 2.2;
+            if(nextbot.position.distanceTo(camera.position) < 2) triggerRealJumpscare();
         }
+        
+        // Update ESP
+        if(debugESP && espMesh) espMesh.position.copy(nextbot.position);
 
         coins.forEach(c => c.rotation.y += delta*2);
     }
