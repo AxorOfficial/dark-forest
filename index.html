@@ -2,60 +2,53 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mroczny Las - FINAL FIXED</title>
+    <title>Ucieczka z Mrocznego Lasu - PC HARDCORE BASE</title>
     <style>
-        body { margin: 0; overflow: hidden; background: black; font-family: 'Courier New', Courier, monospace; color: white; user-select: none; touch-action: none; }
+        body { margin: 0; overflow: hidden; background: black; font-family: 'Courier New', Courier, monospace; color: white; user-select: none; }
         
-        /* UI STARTOWE */
-        #introWarning, #calibrationScreen { position: absolute; width: 100%; height: 100%; background: black; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        #acceptWarningBtn { pointer-events: auto; padding: 20px 40px; font-size: 20px; font-weight: bold; background: red; color: white; border: 2px solid white; cursor: pointer; border-radius: 10px; margin-top: 30px; }
+        #introWarning { position: absolute; width: 100%; height: 100%; background: black; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        #acceptWarningBtn { pointer-events: none; opacity: 0; transition: opacity 1s; padding: 15px 30px; font-size: 20px; font-weight: bold; background: red; color: white; border: none; cursor: pointer; border-radius: 5px; margin-top: 30px;}
+        #acceptWarningBtn:hover { background: darkred; }
+
+        #calibrationScreen { display: none; position: absolute; width: 100%; height: 100%; background: black; z-index: 900; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        #firstJumpscare { display: none; position: absolute; width: 100%; height: 100%; background: black; z-index: 2000; background-image: url('jumpscarefirst.gif'); background-size: contain; background-repeat: no-repeat; background-position: center; }
+        #gameJumpscare { display: none; position: absolute; width: 100%; height: 100%; background: black; z-index: 2000; background-image: url('jumpscare.png'); background-size: contain; background-repeat: no-repeat; background-position: center; }
         
-        /* JUMPSCARE */
-        #firstJumpscare, #gameJumpscare { display: none; position: absolute; width: 100%; height: 100%; background: black; z-index: 2000; background-size: contain; background-repeat: no-repeat; background-position: center; }
-        #firstJumpscare { background-image: url('jumpscarefirst.gif'); }
-        #gameJumpscare { background-image: url('jumpscare.png'); }
-
-        /* MENU PAUZY / STARTU */
-        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        #instructions { font-size: 24px; cursor: pointer; text-align: center; padding: 20px; border: 1px solid white; background: rgba(0,0,0,0.5); border-radius: 10px; }
-
-        /* HUD */
-        #ui { position: absolute; top: 10px; left: 10px; z-index: 50; font-size: 18px; text-shadow: 2px 2px 2px black; pointer-events: none; }
+        #blocker { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        #instructions { font-size: 24px; cursor: pointer; text-align: center; }
+        
+        #ui { position: absolute; top: 10px; left: 10px; z-index: 50; font-size: 20px; text-shadow: 2px 2px 2px black; pointer-events: none; }
+        .ui-item { margin-bottom: 5px; }
+        #buffsContainer { margin-top: 15px; font-weight: bold; }
         .buff-speed { color: yellow; display: none; }
         .buff-tracker { color: red; display: none; }
         .debuff-bush { color: purple; display: none; } 
+
         #crosshair { position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: white; border-radius: 50%; transform: translate(-50%, -50%); z-index: 50; pointer-events: none; }
-
-        /* MINIGRY & SKLEP */
-        .overlay { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20, 20, 20, 0.95); padding: 20px; border: 2px solid white; z-index: 200; text-align: center; border-radius: 10px; }
-        #gdCanvas { border: 2px solid white; background: #222; margin-top: 10px; display: none; }
+        
+        .overlay { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20, 20, 20, 0.95); padding: 30px; border: 2px solid white; z-index: 200; text-align: center; border-radius: 10px; }
+        input[type="text"] { background: black; color: white; border: 1px solid white; padding: 10px; font-size: 16px; width: 80%; cursor: text; }
+        button { background: white; color: black; border: none; padding: 10px 20px; font-size: 18px; cursor: pointer; margin-top: 10px; }
+        button:hover { background: gray; }
+        button:disabled { background: #333; color: #666; cursor: not-allowed; }
+        #secretInput { margin-top: 20px; font-size: 12px; cursor: default; }
+        
+        #gdCanvas { border: 2px solid white; background: #222; margin-top: 10px; display: none; cursor: crosshair; }
         #osuCanvas { border: 2px solid white; background: #111; margin-top: 10px; display: block; }
-        input[type="text"] { background: black; color: white; border: 1px solid white; padding: 10px; }
-        button { background: white; color: black; border: none; padding: 10px; margin: 5px; cursor: pointer; }
-
-        /* STEROWANIE MOBILNE */
-        #mobileControls { display: none; position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 150; pointer-events: none; }
-        #joystickZone { position: absolute; bottom: 50px; left: 50px; width: 120px; height: 120px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); pointer-events: auto; }
-        #joystickKnob { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; background: rgba(255, 255, 255, 0.5); border-radius: 50%; transform: translate(-50%, -50%); }
-        #actionButtons { position: absolute; bottom: 30px; right: 30px; display: flex; gap: 15px; pointer-events: auto; flex-direction: column-reverse; align-items: flex-end; }
-        .mob-btn { width: 60px; height: 60px; background: rgba(255, 255, 255, 0.2); border: 2px solid white; border-radius: 50%; color: white; font-size: 24px; display: flex; justify-content: center; align-items: center; user-select: none; }
-        .mob-btn:active { background: rgba(255, 255, 255, 0.5); }
-        .mob-btn-big { width: 80px; height: 80px; font-size: 35px; background: rgba(255, 0, 0, 0.3); }
-        #lookZone { position: absolute; top: 0; right: 0; width: 50%; height: 70%; z-index: 140; pointer-events: auto; }
     </style>
 </head>
 <body>
 
     <div id="introWarning">
         <h1 style="color: red;">⚠️ OSTRZEŻENIE ⚠️</h1>
-        <p>Ta gra zawiera głośne dźwięki i jumpscare'y.</p>
-        <button id="acceptWarningBtn">ROZPOCZNIJ</button>
+        <p>Gra zawiera nagłe dźwięki i obrazy (Jumpscare).</p>
+        <button id="acceptWarningBtn">WEJDŹ DO LASU</button>
+        <p style="margin-top: 20px; color: gray;">[Wciśnij ENTER aby pominąć intro]</p>
     </div>
 
-    <div id="calibrationScreen" style="display: none;">
-        <h2>Krok 1: Kalibracja</h2>
-        <p>Podkręć głośność...</p>
+    <div id="calibrationScreen">
+        <h2>Kalibracja Dźwięku</h2>
+        <p>Podkręć głośność, aż usłyszysz świerszcze...</p>
         <p style="margin-top: 30px; color: gray;">Ładowanie: <span id="calibTimer">0</span>%</p>
     </div>
 
@@ -63,43 +56,36 @@
     <div id="gameJumpscare"></div>
 
     <div id="ui">
-        <div>💰 Monety: <span id="coinCount">0</span>/250</div>
-        <div>🧩 Przyciski: <span id="btnCount">0</span>/3</div>
+        <div class="ui-item">💰 Monety: <span id="coinCount">0</span>/250</div>
+        <div class="ui-item">🧩 Przyciski: <span id="btnCount">0</span>/3</div>
         <div id="buffsContainer">
-            <div id="uiSpeed" class="buff-speed">⚡ Szybkość: <span id="speedTimeText">0</span>s</div>
-            <div id="uiTracker" class="buff-tracker">👁️ Lokalizator: <span id="trackerTimeText">0</span>s</div>
-            <div id="uiBushCD" class="debuff-bush">🚫 Krzaki: <span id="bushTimeText">0</span>s</div>
+            <div id="uiSpeed" class="buff-speed">⚡ Szybkość: <span id="speedTimeText">60</span>s</div>
+            <div id="uiTracker" class="buff-tracker">👁️ Lokalizator: <span id="trackerTimeText">10</span>s</div>
+            <div id="uiBushCD" class="debuff-bush">🚫 Krzaki Zablokowane: <span id="bushTimeText">180</span>s</div>
         </div>
     </div>
 
-    <div id="mobileControls">
-        <div id="joystickZone"><div id="joystickKnob"></div></div>
-        <div id="actionButtons">
-            <div class="mob-btn" id="btnJump">⬆️</div>
-            <div class="mob-btn mob-btn-big" id="btnInteract">🖐️</div>
-            <div class="mob-btn" id="btnSprint">🏃</div>
-        </div>
-    </div>
-    <div id="lookZone"></div>
     <div id="crosshair"></div>
 
     <div id="blocker">
         <div id="instructions">
             <h1 id="mainTitle">Mroczny Las</h1>
-            <p style="color: yellow;">[ KLIKNIJ ABY GRAĆ ]</p>
+            <p>Kliknij, aby rozpocząć</p>
+            <p style="font-size: 14px;">WSAD - Ruch | SHIFT - Sprint | SPACJA - Skok | E - Interakcja</p>
             <div id="secretInput">
-                <input type="text" id="secretCode" placeholder="Kod..." maxlength="5">
-                <button onclick="checkSecret()">OK</button>
+                <p>???</p>
+                <input type="text" id="secretCode" placeholder="Wpisz kod..." maxlength="5">
+                <button onclick="checkSecret()">Zastosuj</button>
             </div>
         </div>
     </div>
 
-    <div id="puzzle1" class="overlay"><h2>Zagadka #1</h2><p>Dźwięk!</p><input type="text" id="ans1"><button onclick="solvePuzzle1()">OK</button><p id="timer1" style="color:red;">20</p></div>
-    <div id="puzzle2" class="overlay"><h2>Zagadka #2</h2><video id="puzzleVideo" width="200" height="150" controls></video><input type="text" id="ans2"><button onclick="solvePuzzle2()">OK</button><p id="timer2" style="color:red;">20</p></div>
-    <div id="puzzle3" class="overlay"><h2>Zagadka #3</h2><canvas id="gdCanvas" width="300" height="200"></canvas><button id="startGdBtn" onclick="startGD()">Start</button><p id="timer3" style="color:red;"></p></div>
-    <div id="osuOverlay" class="overlay"><h2 style="color: lime;">Cicho!</h2><p>Trafiaj!</p><p>Celność: <span id="osuAcc">100</span>%</p><canvas id="osuCanvas" width="300" height="400"></canvas></div>
-    <div id="shop" class="overlay"><h2>Sklep</h2><p>Monety: <span id="shopCoins">0</span></p><button onclick="buySpeed()">Szybkość (10g)</button><button onclick="buyTracker()">Lokalizator (10g)</button><button onclick="closeShop()">Wyjdź</button></div>
-    <div id="endScreen" class="overlay"><h1 id="endTitle">KONIEC</h1><p id="endSubtitle"></p><button onclick="location.reload()">Reset</button></div>
+    <div id="puzzle1" class="overlay"><h2>Zagadka #1</h2><p>Masz 20 sekund! Posłuchaj.</p><input type="text" id="ans1"><button onclick="solvePuzzle1()">Zatwierdź</button><p id="timer1" style="color: red;">20</p></div>
+    <div id="puzzle2" class="overlay"><h2>Zagadka #2</h2><p>Co to za level?</p><video id="puzzleVideo" width="300" height="200" controls></video><input type="text" id="ans2"><button onclick="solvePuzzle2()">Zatwierdź</button><p id="timer2" style="color: red;">20</p></div>
+    <div id="puzzle3" class="overlay"><h2>Zagadka #3 - Wave</h2><p>Przetrwaj 10 sekund!</p><canvas id="gdCanvas" width="400" height="300"></canvas><button id="startGdBtn" onclick="startGD()">Start</button><p id="timer3" style="color: red;"></p></div>
+    <div id="osuOverlay" class="overlay"><h2 style="color: lime;">🤫 Cicho!</h2><p>Klawisze: D F J K</p><p>Celność: <span id="osuAcc">100</span>%</p><canvas id="osuCanvas" width="400" height="500"></canvas></div>
+    <div id="shop" class="overlay"><h2>Sklep</h2><p>Monety: <span id="shopCoins"></span></p><p id="shopWarning" style="color: red; display: none;">Za mało monet!</p><button onclick="buySpeed()">Szybkość (1 min) - 10g</button><br><button onclick="buyTracker()">Lokalizator (10s) - 10g</button><br><button onclick="closeShop()">Wyjdź</button></div>
+    <div id="endScreen" class="overlay"><h1 id="endTitle">Uciekłeś!</h1><p id="endSubtitle">Wygrałeś grę.</p><button onclick="location.reload()">Zagraj Ponownie</button></div>
 
     <audio id="sndCrickets" src="crickets.mp3" loop preload="auto"></audio>
     <audio id="sndFakeJumpscare" src="jumpscarefirstsound.mp3" preload="auto"></audio>
@@ -109,335 +95,203 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
 
 <script>
-// --- KONFIGURACJA URZĄDZENIA ---
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+// --- CORE SETUP ---
+function stopAllGameSounds() { if(ambientAudio && ambientAudio.isPlaying) ambientAudio.stop(); if(nextbotAudio && nextbotAudio.isPlaying) nextbotAudio.stop(); if(agroAudio && agroAudio.isPlaying) agroAudio.stop(); let c = document.getElementById('sndCrickets'); c.pause(); c.currentTime = 0; let f = document.getElementById('sndFakeJumpscare'); f.pause(); f.currentTime = 0; }
 
-// USTAWIENIA OPTYMALIZACJI
-// Jeśli Mobile: 2000 drzew, 1000 krzaków. Jeśli PC: 13000 drzew, 6000 krzaków.
-const TREE_COUNT = isMobile ? 2000 : 13000;
-const BUSH_COUNT = isMobile ? 1000 : 6000;
+let introFinished = false; let calibInterval; let calibTimeout1; let calibTimeout2;
+setTimeout(() => { const btn = document.getElementById('acceptWarningBtn'); btn.style.pointerEvents = "auto"; btn.style.opacity = "1"; }, 3000);
+document.getElementById('acceptWarningBtn').addEventListener('click', function() { document.getElementById('introWarning').style.display = 'none'; startCalibration(); });
 
-if (isMobile) {
-    document.getElementById('mobileControls').style.display = 'block';
-    // Fix dla mobile touch events
-    document.body.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
-}
+function skipIntro() { if(introFinished) return; clearInterval(calibInterval); clearTimeout(calibTimeout1); clearTimeout(calibTimeout2); stopAllGameSounds(); document.getElementById('introWarning').style.display = 'none'; document.getElementById('calibrationScreen').style.display = 'none'; document.getElementById('firstJumpscare').style.display = 'none'; document.getElementById('blocker').style.display = 'flex'; introFinished = true; animate(); }
+window.addEventListener('keydown', function(e) { if (e.code === 'Enter' && !introFinished) skipIntro(); });
 
-// --- SETUP STARTOWY ---
-let introFinished = false;
-let gameStarted = false;
+function startCalibration() { document.getElementById('calibrationScreen').style.display = 'flex'; let c = document.getElementById('sndCrickets'); c.volume = 0.1; c.play().catch(e=>console.warn("Brak pliku")); let p = 0; calibInterval = setInterval(() => { p += Math.floor(Math.random() * 5); if(p>99) p=99; document.getElementById('calibTimer').innerText = p; }, 700); calibTimeout1 = setTimeout(() => { clearInterval(calibInterval); c.pause(); c.currentTime = 0; document.getElementById('calibrationScreen').style.display = 'none'; document.getElementById('firstJumpscare').style.display = 'block'; let l = document.getElementById('sndFakeJumpscare'); l.volume = 1.0; l.play().catch(e=>console.warn("Brak pliku")); calibTimeout2 = setTimeout(() => { l.pause(); l.currentTime = 0; document.getElementById('firstJumpscare').style.display = 'none'; document.getElementById('blocker').style.display = 'flex'; introFinished = true; animate(); }, 2500); }, 15000); }
 
-// Kliknięcie w Ostrzeżenie rozpoczyna kalibrację
-document.getElementById('acceptWarningBtn').addEventListener('click', () => {
-    document.getElementById('introWarning').style.display = 'none';
-    startCalibration();
-});
-// Dla pewności na mobile (touch)
-document.getElementById('acceptWarningBtn').addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    document.getElementById('introWarning').style.display = 'none';
-    startCalibration();
-});
+// ZMIENNE GLOBALNE
+let isSecretMode = false; let gameWon = false; let hasFlashlight = false; let flashlightSpot; let buttonsFound = 0; let coinsCollected = 0; let isAggro = false; let nextbotTrackerActive = false; let gameStarted = false; let speedTimeLeft = 0; let trackerTimeLeft = 0; let speedMult = 1.0; let bushCooldownTime = 0; let isHiding = false; let isSprinting = false; let velocityY = 0; const gravity = -30.0; const jumpStrength = 12.0; let canJump = false; 
+const gridCellSize = 20; const treeCollisionGrid = {}; function getGridKey(x, z) { return Math.floor(x / gridCellSize) + "_" + Math.floor(z / gridCellSize); }
+let assets = { nextbotImg: 'nextbot.jpg', nextbotSound: 'nextbotsound.mp3', agroSound: 'agro.mp3', puzzle1Sound: 'zagadka1.mp3', puzzle2Video: 'wideo.mp4', ambientSound: 'ambient.mp3' };
 
-// LOGIKA KALIBRACJI (NAPRAWIONA: 15 SEKUND)
-function startCalibration() {
-    document.getElementById('calibrationScreen').style.display = 'flex';
-    // Próba odpalenia audio (wymagane przez przeglądarki)
-    let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    
-    let c = document.getElementById('sndCrickets');
-    c.volume = 0.1; 
-    c.play().catch(e => console.log("Audio play error:", e));
-
-    let percent = 0;
-    // Interval 150ms * 100 kroków = ok. 15 sekund
-    let interval = setInterval(() => {
-        // Losowy przyrost 0-2%
-        percent += Math.random() * 1.5;
-        if (percent >= 100) {
-            percent = 100;
-            clearInterval(interval);
-            finishCalibration();
-        }
-        document.getElementById('calibTimer').innerText = Math.floor(percent);
-    }, 150);
-}
-
-function finishCalibration() {
-    document.getElementById('sndCrickets').pause();
-    document.getElementById('calibrationScreen').style.display = 'none';
-    document.getElementById('firstJumpscare').style.display = 'block';
-    
-    let scream = document.getElementById('sndFakeJumpscare');
-    scream.volume = 1.0;
-    scream.play().catch(e => console.log(e));
-
-    setTimeout(() => {
-        document.getElementById('firstJumpscare').style.display = 'none';
-        scream.pause();
-        scream.currentTime = 0;
-        document.getElementById('blocker').style.display = 'flex';
-        introFinished = true;
-        animate(); // Start pętli renderowania
-    }, 2000);
-}
-
-// --- ROZPOCZĘCIE ROZGRYWKI (NAPRAWIONE) ---
-function startGame() {
-    if (!introFinished) return;
-    if (isHiding) return;
-
-    // Odpalenie dźwięków Three.js
-    if (audioListener.context.state === 'suspended') audioListener.context.resume();
-    if (isAmbientLoaded && !ambientAudio.isPlaying) ambientAudio.play();
-    if (isBotAudioLoaded && !nextbotAudio.isPlaying) nextbotAudio.play();
-
-    if (isMobile) {
-        // Mobile: Bez PointerLock, po prostu ukryj menu
-        document.getElementById('blocker').style.display = 'none';
-        gameStarted = true;
-    } else {
-        // PC: Wymuś PointerLock
-        controls.lock();
-    }
-}
-
-document.getElementById('instructions').addEventListener('click', startGame);
-document.getElementById('instructions').addEventListener('touchstart', (e) => { e.preventDefault(); startGame(); });
-
-// PC Only Events
-controls.addEventListener('lock', () => {
-    document.getElementById('blocker').style.display = 'none';
-    if(isSecretMode && !gameWon) showWarningText();
-    gameStarted = true;
-});
-controls.addEventListener('unlock', () => {
-    if(!gameWon && introFinished && !isHiding && !isMobile) {
-        if(document.getElementById('puzzle1').style.display !== 'block') {
-            document.getElementById('blocker').style.display = 'flex';
-        }
-    }
-});
-
-// --- THREE.JS SETUP ---
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x000000); scene.fog = new THREE.FogExp2(0x000000, 0.035);
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 300); camera.position.y = 1.5;
-
-// RENDERER - OPTYMALIZACJA
-const renderer = new THREE.WebGLRenderer({ antialias: !isMobile }); // Antyaliasing tylko na PC
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(isMobile ? 1 : window.devicePixelRatio); // 1x pixeli na mobile dla FPS
-renderer.shadowMap.enabled = !isMobile; // Cienie tylko na PC
-document.body.appendChild(renderer.domElement);
-
+const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.shadowMap.enabled = true; document.body.appendChild(renderer.domElement);
 const controls = new THREE.PointerLockControls(camera, document.body);
+const blocker = document.getElementById('blocker'); const instructions = document.getElementById('instructions');
+const secretInputDiv = document.getElementById('secretInput'); secretInputDiv.addEventListener('click', function(event) { event.stopPropagation(); });
+
+// AUDIO
 const audioListener = new THREE.AudioListener(); camera.add(audioListener);
 const audioLoader = new THREE.AudioLoader(); 
 const ambientAudio = new THREE.Audio(audioListener);
 const nextbotAudio = new THREE.PositionalAudio(audioListener); 
 const agroAudio = new THREE.Audio(audioListener); 
-
 let isAmbientLoaded = false; let isBotAudioLoaded = false;
-let assets = { nextbotImg: 'nextbot.jpg', nextbotSound: 'nextbotsound.mp3', agroSound: 'agro.mp3', puzzle1Sound: 'zagadka1.mp3', puzzle2Video: 'wideo.mp4', ambientSound: 'ambient.mp3' };
 
-audioLoader.load(assets.ambientSound, (b) => { ambientAudio.setBuffer(b); ambientAudio.setLoop(true); ambientAudio.setVolume(0.15); isAmbientLoaded=true; });
-audioLoader.load(assets.nextbotSound, (b) => { nextbotAudio.setBuffer(b); nextbotAudio.setRefDistance(20); nextbotAudio.setLoop(true); nextbotAudio.setVolume(1.0); isBotAudioLoaded=true; });
-audioLoader.load(assets.agroSound, (b) => { agroAudio.setBuffer(b); agroAudio.setLoop(true); });
+audioLoader.load(assets.ambientSound, function(buffer) { ambientAudio.setBuffer(buffer); ambientAudio.setLoop(true); ambientAudio.setVolume(0.15); isAmbientLoaded = true; }, undefined, function(err) { console.warn("Brak " + assets.ambientSound); });
+audioLoader.load(assets.nextbotSound, function(buffer) { nextbotAudio.setBuffer(buffer); nextbotAudio.setRefDistance(20); nextbotAudio.setLoop(true); nextbotAudio.setVolume(1.0); isBotAudioLoaded = true; }, undefined, function(err) { console.warn("Brak " + assets.nextbotSound); }); 
+audioLoader.load(assets.agroSound, function(buffer) { agroAudio.setBuffer(buffer); agroAudio.setLoop(true); });
 
-// TERRAIN
-const textureLoader = new THREE.TextureLoader();
-const floorTexture = textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg');
-floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; floorTexture.repeat.set(50, 50);
-function getTerrainHeight(x, z) { return Math.sin(x/15) * Math.cos(z/15) * 2; }
-const terrain = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200, 100, 100), new THREE.MeshStandardMaterial({ map: floorTexture, color: 0x333333 }));
-const pos = terrain.geometry.attributes.position;
-for(let i=0; i<pos.count; i++) pos.setZ(i, getTerrainHeight(pos.getX(i), pos.getY(i)));
-terrain.geometry.computeVertexNormals(); terrain.rotation.x = -Math.PI/2; scene.add(terrain);
+document.addEventListener('click', function() { if(!introFinished) return; if (audioListener.context.state === 'suspended') audioListener.context.resume(); if (isAmbientLoaded && !ambientAudio.isPlaying) ambientAudio.play(); if (isBotAudioLoaded && !nextbotAudio.isPlaying) nextbotAudio.play(); });
+instructions.addEventListener('click', function () { if(introFinished && !isHiding) controls.lock(); });
+controls.addEventListener('lock', function () { blocker.style.display = 'none'; if(isSecretMode && !gameWon) showWarningText(); gameStarted = true; });
+controls.addEventListener('unlock', function () { if(!gameWon && introFinished && !isHiding && document.getElementById('puzzle1').style.display !== 'block' && document.getElementById('puzzle2').style.display !== 'block' && document.getElementById('puzzle3').style.display !== 'block' && document.getElementById('shop').style.display !== 'block') { blocker.style.display = 'flex'; } });
 
-const ambientLight = new THREE.AmbientLight(0x111111); scene.add(ambientLight);
-const flashlight = new THREE.SpotLight(0xffffff, 0, 40, Math.PI/5, 0.3, 1);
-flashlight.position.set(0,0,0); flashlight.target.position.set(0,0,-1);
-camera.add(flashlight); camera.add(flashlight.target); scene.add(camera);
+function createTextSprite(msg) { const c = document.createElement('canvas'); const ctx = c.getContext('2d'); c.width = 512; c.height = 128; ctx.font = "Bold 60px Courier New"; ctx.fillStyle = "white"; ctx.textAlign = "center"; ctx.fillText(msg, 256, 64); const t = new THREE.CanvasTexture(c); const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t })); s.scale.set(3, 0.75, 1); return s; }
+function getTerrainHeight(x, z) { return Math.sin(x / 10) * Math.cos(z / 10) * 2; }
 
-// OBIEKTY
+const textureLoader = new THREE.TextureLoader(); const floorTexture = textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg'); floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; floorTexture.repeat.set(100, 100);
+const terrainGeo = new THREE.PlaneGeometry(1200, 1200, 200, 200); const posAttr = terrainGeo.attributes.position;
+for(let i=0; i<posAttr.count; i++) posAttr.setZ(i, getTerrainHeight(posAttr.getX(i), posAttr.getY(i)));
+terrainGeo.computeVertexNormals(); const terrain = new THREE.Mesh(terrainGeo, new THREE.MeshStandardMaterial({ map: floorTexture, roughness: 0.9, color: 0x333333 })); terrain.rotation.x = -Math.PI / 2; terrain.receiveShadow = true; scene.add(terrain);
+
+const ambientLight = new THREE.AmbientLight(0x010101); scene.add(ambientLight);
+flashlightSpot = new THREE.SpotLight(0xffffff, 0, 40, Math.PI/5, 0.3, 1); flashlightSpot.position.set(0, 0, 0); flashlightSpot.target.position.set(0, 0, -1); camera.add(flashlightSpot); camera.add(flashlightSpot.target); scene.add(camera);
+
 const interactables = [];
-const treeCollisionGrid = {}; function getGridKey(x, z) { return Math.floor(x/20)+"_"+Math.floor(z/20); }
+const flashGroup = new THREE.Group(); const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.25, 16), new THREE.MeshStandardMaterial({color: 0x222222})); handle.rotation.x = Math.PI/2; const head = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.1, 16), new THREE.MeshStandardMaterial({color: 0x888888})); head.rotation.x = Math.PI/2; head.position.z = -0.15; flashGroup.add(handle); flashGroup.add(head); let l = createTextSprite("Latarka [E]"); l.position.y=0.5; flashGroup.add(l); flashGroup.position.set(2, getTerrainHeight(2, -2)+0.05, -2); flashGroup.name="flashlight"; scene.add(flashGroup); interactables.push(flashGroup);
 
-// DRZEWA (Ilość zależna od urządzenia)
-const treeGeo = new THREE.CylinderGeometry(0.4, 0.6, 6, 6); const treeMat = new THREE.MeshStandardMaterial({color: 0x1a0f00});
-const leafGeo = new THREE.ConeGeometry(2.5, 6, 6); const leafMat = new THREE.MeshStandardMaterial({color: 0x001a00});
-const iTrunk = new THREE.InstancedMesh(treeGeo, treeMat, TREE_COUNT);
-const iLeaf = new THREE.InstancedMesh(leafGeo, leafMat, TREE_COUNT);
-const dummy = new THREE.Object3D();
+// LAS - PEŁNE 13000 DRZEW
+function addVegetation() {
+    const totalTrees = 13000; 
+    const iTrunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.4, 0.6, 6, 8), new THREE.MeshStandardMaterial({color: 0x1a0f00}), totalTrees);
+    const iLeaf = new THREE.InstancedMesh(new THREE.ConeGeometry(2.5, 6, 8), new THREE.MeshStandardMaterial({color: 0x001a00}), totalTrees);
+    const dummy = new THREE.Object3D();
+    for(let i=0; i<totalTrees; i++) {
+        let x = (Math.random() - 0.5) * 1100; let z = (Math.random() - 0.5) * 1100; let y = getTerrainHeight(x, z); 
+        let key = getGridKey(x, z); if(!treeCollisionGrid[key]) treeCollisionGrid[key] = []; treeCollisionGrid[key].push({x: x, z: z, radius: 0.60});
+        dummy.position.set(x, y + 2.5, z); dummy.rotation.y = Math.random() * 3; dummy.updateMatrix(); iTrunk.setMatrixAt(i, dummy.matrix);
+        dummy.position.set(x, y + 7.0, z); dummy.updateMatrix(); iLeaf.setMatrixAt(i, dummy.matrix);
+    }
+    scene.add(iTrunk); scene.add(iLeaf);
 
-for(let i=0; i<TREE_COUNT; i++) {
-    let x = (Math.random()-0.5)*1100; let z = (Math.random()-0.5)*1100; let y = getTerrainHeight(x,z);
-    let k = getGridKey(x,z); if(!treeCollisionGrid[k]) treeCollisionGrid[k]=[]; treeCollisionGrid[k].push({x:x,z:z,r:0.6});
-    dummy.position.set(x, y+2.5, z); dummy.rotation.y = Math.random()*3; dummy.updateMatrix(); iTrunk.setMatrixAt(i, dummy.matrix);
-    dummy.position.set(x, y+7, z); dummy.updateMatrix(); iLeaf.setMatrixAt(i, dummy.matrix);
+    const bushCount = 6000;
+    const iBush = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0), new THREE.MeshStandardMaterial({color: 0x002200}), bushCount);
+    for(let i=0; i<bushCount; i++) { let x=(Math.random()-0.5)*1100; let z=(Math.random()-0.5)*1100; let y=getTerrainHeight(x,z); dummy.position.set(x,y,z); dummy.scale.setScalar(0.5+Math.random()); dummy.updateMatrix(); iBush.setMatrixAt(i,dummy.matrix); }
+    scene.add(iBush);
+
+    const hideGeo = new THREE.IcosahedronGeometry(2.5, 0); const hideMat = new THREE.MeshStandardMaterial({color: 0x003300, emissive: 0x001100}); 
+    for(let i=0; i<30; i++) { let x=(Math.random()-0.5)*1100; let z=(Math.random()-0.5)*1100; let y=getTerrainHeight(x,z); const g=new THREE.Group(); g.add(new THREE.Mesh(hideGeo, hideMat)); let lbl=createTextSprite("Krzak [E]"); lbl.position.y=3; g.add(lbl); g.position.set(x,y+1.2,z); g.name="hidingBush"; scene.add(g); interactables.push(g); }
 }
-scene.add(iTrunk); scene.add(iLeaf);
+addVegetation();
 
-// PRZYCISKI Z LASERAMI
-function createButton(id) {
-    const g = new THREE.Group();
-    const base = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 0.8), new THREE.MeshStandardMaterial({color: 0x333333})); g.add(base);
-    const btn = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.5), new THREE.MeshStandardMaterial({color: 0xff0000, emissive: 0x550000})); btn.position.y=0.15; g.add(btn);
-    // LASER
-    const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 400, 8), new THREE.MeshBasicMaterial({color: 0xff0000, opacity: 0.6, transparent: true})); beam.position.y=200; g.add(beam);
-    let x = (Math.random()-0.5)*1000; let z = (Math.random()-0.5)*1000;
-    g.position.set(x, getTerrainHeight(x,z)+0.05, z); g.name = "button"+id; scene.add(g); interactables.push(g);
-}
+let coins = []; function addCoins() { const coinGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.1, 16); const coinMat = new THREE.MeshStandardMaterial({color: 0xffd700, emissive: 0xffaa00}); for(let i=0; i<250; i++) { let g=new THREE.Group(); let m=new THREE.Mesh(coinGeo, coinMat); m.rotation.x=Math.PI/2; g.add(m); let x=(Math.random()-0.5)*1000; let z=(Math.random()-0.5)*1000; g.position.set(x, getTerrainHeight(x,z)+1, z); g.name="coin"; scene.add(g); interactables.push(g); coins.push(g); } } addCoins();
+
+// BUTTONS - BEZ LASERÓW, ALE Z GLOWEM (POD 40 MINUT EKSPLORACJI)
+function createButton(id) { 
+    const group = new THREE.Group(); 
+    const base = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 0.8), new THREE.MeshStandardMaterial({color: 0x333333})); group.add(base); 
+    const btn = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.5), new THREE.MeshStandardMaterial({color: 0xff0000, emissive: 0x550000})); btn.position.y = 0.15; group.add(btn); 
+    // MOCNY LOCAL GLOW (zamiast lasera)
+    const light = new THREE.PointLight(0xff0000, 3, 20); light.position.y = 1.0; group.add(light); 
+    
+    let x = (Math.random()-0.5)*1000; let z = (Math.random()-0.5)*1000; 
+    group.position.set(x, getTerrainHeight(x,z) + 0.05, z); 
+    group.name = "button" + id; 
+    scene.add(group); interactables.push(group); 
+} 
 for(let i=1; i<=3; i++) createButton(i);
 
-const door = new THREE.Mesh(new THREE.BoxGeometry(2, 4, 0.2), new THREE.MeshStandardMaterial({color: 0xcccccc})); 
-door.position.set(300, getTerrainHeight(300,300)+2, 300); door.visible=false; door.name="door"; scene.add(door); interactables.push(door);
+const door = new THREE.Mesh(new THREE.BoxGeometry(2, 4, 0.2), new THREE.MeshStandardMaterial({color: 0xcccccc})); door.position.set(300, getTerrainHeight(300,300)+2, 300); door.visible=false; door.name="door"; scene.add(door); interactables.push(door);
 
-// NEXTBOT
-let nextbotMat = new THREE.SpriteMaterial({color: 0xffffff}); let nextbot = new THREE.Sprite(nextbotMat);
-nextbot.renderOrder=999; nextbot.scale.set(6,6,1); nextbot.position.set(200,0,200); scene.add(nextbot); nextbot.add(nextbotAudio);
-textureLoader.load(assets.nextbotImg, (t) => { nextbotMat.map = t; let ar = t.image.width/t.image.height; nextbot.scale.set(6*ar, 6, 1); });
+const bodyGeo=new THREE.ConeGeometry(0.8, 2.5, 8); const bodyMat=new THREE.MeshStandardMaterial({color: 0x220044}); const headGeo=new THREE.SphereGeometry(0.5); const headMat=new THREE.MeshStandardMaterial({color: 0x110022});
+for(let i=0; i<20; i++) { const g=new THREE.Group(); const b=new THREE.Mesh(bodyGeo,bodyMat); b.position.y=1.25; g.add(b); const h=new THREE.Mesh(headGeo,headMat); h.position.y=2.5; g.add(h); let l=createTextSprite("Sklep [E]"); l.position.y=3.5; g.add(l); let x=(Math.random()-0.5)*1000; let z=(Math.random()-0.5)*1000; g.position.set(x, getTerrainHeight(x,z), z); g.name="npc"; scene.add(g); interactables.push(g); }
 
-// --- GAMEPLAY VARS ---
-let isSecretMode=false; let gameWon=false; let hasFlashlight=false; let buttonsFound=0; let coinsCollected=0; let isAggro=false;
-let speedTimeLeft=0; let trackerTimeLeft=0; let speedMult=1.0; let bushCooldownTime=0; let isHiding=false;
-let velocity = new THREE.Vector3(); let moveForward=false; let moveBackward=false; let moveLeft=false; let moveRight=false; let isSprinting=false; let canJump=false; let velocityY=0; const gravity=-30.0; const jumpStrength=12.0;
-let extraNextbots = [];
+let nextbotMat = new THREE.SpriteMaterial({ color: 0xff0000 }); let nextbot = new THREE.Sprite(nextbotMat); nextbot.renderOrder = 999; nextbot.scale.set(6, 6, 1); nextbot.position.set(250, getTerrainHeight(250,250)+2.2, 250); scene.add(nextbot);
+textureLoader.load(assets.nextbotImg, function(t) { nextbotMat.map = t; nextbotMat.color.setHex(0xffffff); let ar = t.image.width / t.image.height; nextbot.scale.set(6 * ar, 6, 1); }, undefined, function() { console.log("Error img"); });
+nextbot.add(nextbotAudio); 
 
-// --- SECRETS ---
-function checkSecret() {
-    let val = document.getElementById('secretCode').value;
-    if(val === "...") { isAggro=true; alert("CHAOS MODE ACTIVATED"); for(let i=0; i<9; i++) { let c = nextbot.clone(); c.position.set((Math.random()-0.5)*1000, 0, (Math.random()-0.5)*1000); scene.add(c); extraNextbots.push(c); } }
-    if(val === "81ZJA") { isSecretMode=true; assets.nextbotImg='nextbot2.png'; textureLoader.load(assets.nextbotImg, (t)=>{nextbotMat.map=t;}); alert("SECRET MODE"); }
-}
+let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false; const velocity = new THREE.Vector3(); const direction = new THREE.Vector3(); let osuLaneFlash = [0, 0, 0, 0]; 
+const onKeyDown = function (e) { if(!introFinished) return; if(isHiding) { if(e.code==='KeyD') {handleOsuInput(0);osuLaneFlash[0]=5;} if(e.code==='KeyF') {handleOsuInput(1);osuLaneFlash[1]=5;} if(e.code==='KeyJ') {handleOsuInput(2);osuLaneFlash[2]=5;} if(e.code==='KeyK') {handleOsuInput(3);osuLaneFlash[3]=5;} return; } switch (e.code) { case 'KeyW': moveForward = true; break; case 'KeyS': moveBackward = true; break; case 'KeyA': moveLeft = true; break; case 'KeyD': moveRight = true; break; case 'KeyE': interact(); break; case 'ShiftLeft': isSprinting = true; break; case 'Space': if(canJump) { velocityY = jumpStrength; canJump = false; } break; } };
+const onKeyUp = function (e) { if(isHiding) return; switch (e.code) { case 'KeyW': moveForward = false; break; case 'KeyS': moveBackward = false; break; case 'KeyA': moveLeft = false; break; case 'KeyD': moveRight = false; break; case 'ShiftLeft': isSprinting = false; break; } };
+document.addEventListener('keydown', onKeyDown); document.addEventListener('keyup', onKeyUp);
 
-// --- TOUCH CONTROLS ---
-const joystickZone = document.getElementById('joystickZone'); const joystickKnob = document.getElementById('joystickKnob');
-let joystickCenter = {x:0, y:0};
-joystickZone.addEventListener('touchstart', (e)=>{ e.preventDefault(); const r=joystickZone.getBoundingClientRect(); joystickCenter={x:r.left+r.width/2, y:r.top+r.height/2}; handleJoy(e.touches[0]); });
-joystickZone.addEventListener('touchmove', (e)=>{ e.preventDefault(); handleJoy(e.touches[0]); });
-joystickZone.addEventListener('touchend', (e)=>{ e.preventDefault(); joystickKnob.style.top='50%'; joystickKnob.style.left='50%'; moveForward=moveBackward=moveLeft=moveRight=false; });
-function handleJoy(t) {
-    const dx = t.clientX - joystickCenter.x; const dy = t.clientY - joystickCenter.y;
-    const dist = Math.min(Math.sqrt(dx*dx+dy*dy), 60); const ang = Math.atan2(dy, dx);
-    joystickKnob.style.left = (50 + (Math.cos(ang)*dist/60)*50) + '%'; joystickKnob.style.top = (50 + (Math.sin(ang)*dist/60)*50) + '%';
-    moveForward = dy < -15; moveBackward = dy > 15; moveLeft = dx < -15; moveRight = dx > 15;
-}
-document.getElementById('btnJump').addEventListener('touchstart', (e)=>{e.preventDefault(); if(canJump){velocityY=jumpStrength;canJump=false;}});
-document.getElementById('btnInteract').addEventListener('touchstart', (e)=>{e.preventDefault(); interact();});
-document.getElementById('btnSprint').addEventListener('touchstart', (e)=>{e.preventDefault(); isSprinting=true;});
-document.getElementById('btnSprint').addEventListener('touchend', (e)=>{e.preventDefault(); isSprinting=false;});
-
-// LOOK CONTROLS (MOBILE)
-let lastTouchX=0; let lastTouchY=0;
-document.getElementById('lookZone').addEventListener('touchstart', (e)=>{lastTouchX=e.touches[0].clientX; lastTouchY=e.touches[0].clientY;});
-document.getElementById('lookZone').addEventListener('touchmove', (e)=>{
-    if(!gameStarted) return;
-    const dx = e.touches[0].clientX - lastTouchX; const dy = e.touches[0].clientY - lastTouchY;
-    camera.rotation.y -= dx * 0.005; camera.rotation.x -= dy * 0.005;
-    lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY;
-});
-
-// PC KEYS
-document.addEventListener('keydown', (e)=>{ if(!introFinished)return; switch(e.code){ case 'KeyW':moveForward=true;break; case 'KeyS':moveBackward=true;break; case 'KeyA':moveLeft=true;break; case 'KeyD':moveRight=true;break; case 'ShiftLeft':isSprinting=true;break; case 'KeyE':interact();break; case 'Space':if(canJump){velocityY=jumpStrength;canJump=false;}break; } });
-document.addEventListener('keyup', (e)=>{ switch(e.code){ case 'KeyW':moveForward=false;break; case 'KeyS':moveBackward=false;break; case 'KeyA':moveLeft=false;break; case 'KeyD':moveRight=false;break; case 'ShiftLeft':isSprinting=false;break; } });
-
-// --- INTERAKCJA ---
 const raycaster = new THREE.Raycaster();
 function interact() {
-    raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
-    const intersects = raycaster.intersectObjects(interactables, true);
+    raycaster.setFromCamera(new THREE.Vector2(0,0), camera); const intersects = raycaster.intersectObjects(interactables, true);
     if(intersects.length > 0 && intersects[0].distance < 4) {
         let obj = intersects[0].object; while(obj.parent && obj.parent.type !== 'Scene') obj = obj.parent;
-        if(obj.name.includes("button")) { 
-            if(!isMobile) controls.unlock(); scene.remove(obj); buttonsFound++; 
-            document.getElementById('btnCount').innerText = buttonsFound; 
-            if(buttonsFound>=3) door.visible=true; 
-            document.getElementById('puzzle1').style.display='block'; 
-        }
-        else if(obj.name==="door" && buttonsFound>=3) winGame();
-        else if(obj.name==="hidingBush") { if(bushCooldownTime>0) alert("Zablokowane"); else startOsuGame(); }
-        else if(obj.name==="npc") { if(!isMobile) controls.unlock(); document.getElementById('shop').style.display='block'; }
-        else if(obj.name==="coin") { coinsCollected++; document.getElementById('coinCount').innerText=coinsCollected; scene.remove(obj); }
-        else if(obj.name==="flashlight" && !hasFlashlight) { hasFlashlight=true; flashlight.intensity=2.5; scene.remove(obj); }
+        if(obj.name === "flashlight" && !hasFlashlight) { hasFlashlight = true; flashlightSpot.intensity = 2.5; scene.remove(obj); }
+        else if(obj.name === "coin") { coinsCollected++; document.getElementById('coinCount').innerText = coinsCollected; scene.remove(obj); }
+        else if(obj.name === "npc") { controls.unlock(); document.getElementById('shopCoins').innerText = coinsCollected; document.getElementById('shopWarning').style.display = 'none'; document.getElementById('shop').style.display = 'block'; }
+        else if(obj.name.includes("button")) { triggerPuzzle(obj.name.replace("button", ""), obj); }
+        else if(obj.name === "door" && buttonsFound === 3) { winGame(); }
+        else if(obj.name === "hidingBush") { if(bushCooldownTime > 0) alert("Zablokowane!"); else startOsuGame(); }
     }
 }
 
-// --- MINIGRY I SKLEP (LOGIKA UPROSZCZONA) ---
-function winGame() { gameWon=true; if(!isMobile) controls.unlock(); document.getElementById('endScreen').style.display='block'; }
-function closeShop() { document.getElementById('shop').style.display='none'; if(!isMobile) controls.lock(); }
-function buySpeed() { if(coinsCollected>=10) { coinsCollected-=10; speedTimeLeft=60; closeShop(); } }
-function buyTracker() { if(coinsCollected>=10) { coinsCollected-=10; trackerTimeLeft=10; closeShop(); } }
-function solvePuzzle1() { document.getElementById('puzzle1').style.display='none'; if(!isMobile) controls.lock(); }
-function solvePuzzle2() { document.getElementById('puzzle2').style.display='none'; if(!isMobile) controls.lock(); }
-function startGD() { document.getElementById('puzzle3').style.display='none'; if(!isMobile) controls.lock(); }
-// OSU
-let osuActive=false;
-function startOsuGame() { isHiding=true; osuActive=true; document.getElementById('osuOverlay').style.display='block'; if(!isMobile) controls.unlock(); requestAnimationFrame(osuLoop); }
-function osuLoop() { if(!osuActive) return; requestAnimationFrame(osuLoop); } 
-// Proste wyjście z OSU po kliknięciu (dla uproszczenia kodu)
-document.getElementById('osuCanvas').addEventListener('click', ()=>{ osuActive=false; isHiding=false; document.getElementById('osuOverlay').style.display='none'; if(!isMobile) controls.lock(); });
+// MINIGAMES SYSTEM
+let osuGameActive=false; let osuLastTime=0; let osuNotes=[]; let osuHits=0; let osuTotal=0; let osuTimeLeft=15;
+function startOsuGame() { controls.unlock(); isHiding=true; document.getElementById('osuOverlay').style.display='block'; osuNotes=[]; osuHits=0; osuTotal=0; osuTimeLeft=15; osuGameActive=true; osuLastTime=performance.now(); requestAnimationFrame(osuLoop); }
+function osuLoop(t) { if(!osuGameActive) return; let dt=(t-osuLastTime)/1000; osuLastTime=t; osuTimeLeft-=dt; if(osuTimeLeft<=0) { endOsuGame(); return; } 
+    document.getElementById('osuTimerText').innerText=Math.ceil(osuTimeLeft); const ctx=document.getElementById('osuCanvas').getContext('2d'); ctx.clearRect(0,0,400,500); 
+    ctx.strokeStyle='#444'; ctx.lineWidth=2; for(let i=1; i<4; i++) { ctx.beginPath(); ctx.moveTo(i*100,0); ctx.lineTo(i*100,500); ctx.stroke(); } ctx.lineWidth=4; ctx.strokeStyle='white'; for(let i=0;i<4;i++){if(osuLaneFlash[i]>0){ctx.strokeRect(i*100+2,400,96,50); osuLaneFlash[i]--;}}
+    if(Math.random()<2.5*dt) osuNotes.push({lane:Math.floor(Math.random()*4), y:-20, hit:false});
+    for(let i=osuNotes.length-1; i>=0; i--) { let n=osuNotes[i]; n.y+=300*dt; if(!n.hit) { ctx.fillStyle='red'; ctx.fillRect(n.lane*100+10, n.y, 80, 20); } if(n.y>500) { if(!n.hit) osuTotal++; osuNotes.splice(i,1); updateOsuAccuracy(); } } requestAnimationFrame(osuLoop); }
+function handleOsuInput(l) { for(let n of osuNotes) { if(n.lane===l && !n.hit && n.y>380 && n.y<460) { n.hit=true; osuHits++; osuTotal++; updateOsuAccuracy(); return; } } }
+function updateOsuAccuracy() { let acc=osuTotal===0?100:Math.round((osuHits/osuTotal)*100); document.getElementById('osuAcc').innerText=acc; if(osuTotal>10 && acc<85) endOsuGame(false); }
+function endOsuGame(f=null) { osuGameActive=false; document.getElementById('osuOverlay').style.display='none'; isHiding=false; velocity.set(0,0,0); controls.lock(); let acc=osuTotal===0?100:Math.round((osuHits/osuTotal)*100); if(f!==false && acc>=85){} else { bushCooldownTime=180; document.getElementById('uiBushCD').style.display='block'; triggerAggro(); alert("Hałas!"); } }
 
-function triggerRealJumpscare() { 
-    gameWon=false; if(!isMobile) controls.unlock(); 
-    document.getElementById('gameJumpscare').style.display='block'; 
-    setTimeout(()=>{ document.getElementById('gameJumpscare').style.display='none'; document.getElementById('endScreen').style.display='block'; }, 2000); 
-}
+let gdGameActive=false; let gdLastTime=0; let gdTimeLeft=10; let gdY=150; let gdIsHolding=false; let gdObstacles=[]; let gdTrail=[];
+function startGD() { document.getElementById('startGdBtn').style.display='none'; document.getElementById('gdCanvas').style.display='block'; gdGameActive=true; gdY=150; gdIsHolding=false; gdObstacles=[]; gdTrail=[]; gdTimeLeft=10; gdLastTime=performance.now(); const c=document.getElementById('gdCanvas'); const h=()=>gdIsHolding=true; const r=()=>gdIsHolding=false; c.onmousedown=h; c.onmouseup=r; requestAnimationFrame(gdLoop); }
+function gdLoop(t) { if(!gdGameActive) return; let dt=(t-gdLastTime)/1000; gdLastTime=t; gdTimeLeft-=dt; if(gdTimeLeft<=0) { gdGameActive=false; document.getElementById('puzzle3').style.display='none'; controls.lock(); return; }
+    document.getElementById('timer3').innerText=Math.ceil(gdTimeLeft); const ctx=document.getElementById('gdCanvas').getContext('2d'); ctx.clearRect(0,0,400,300);
+    gdY += (gdIsHolding?-300:300)*dt; gdTrail.push({x:57.5,y:gdY+7.5}); if(gdTrail.length>15) gdTrail.shift();
+    ctx.beginPath(); for(let i=0; i<gdTrail.length; i++) { let p=gdTrail[i]; let x=p.x-(gdTrail.length-i)*15; if(i===0) ctx.moveTo(x,p.y); else ctx.lineTo(x,p.y); } ctx.strokeStyle='rgba(255,255,0,0.4)'; ctx.lineWidth=3; ctx.stroke();
+    if(gdY<=0 || gdY>=300) { gdGameActive=false; failPuzzle(3); return; }
+    if(Math.random()<1.8*dt) { let h=50+Math.random()*110; gdObstacles.push({x:400, y:Math.random()<0.5?0:300-h, w:25, h:h}); }
+    for(let i=gdObstacles.length-1; i>=0; i--) { let o=gdObstacles[i]; o.x-=350*dt; ctx.fillStyle='red'; ctx.fillRect(o.x,o.y,o.w,o.h); if(60>o.x && 54<o.x+o.w && gdY+10>o.y && gdY-4<o.y+o.h) { gdGameActive=false; failPuzzle(3); return; } if(o.x+o.w<0) gdObstacles.splice(i,1); } requestAnimationFrame(gdLoop); }
 
-// --- PĘTLA GRY ---
+let currentTimer; 
+function triggerPuzzle(id, obj) { controls.unlock(); if(obj) scene.remove(obj); buttonsFound++; document.getElementById('btnCount').innerText=buttonsFound; if(buttonsFound===3) door.visible=true; 
+    if(id==="1") { document.getElementById('puzzle1').style.display='block'; new Audio(assets.puzzle1Sound).play(); startTimer(1,20); } 
+    else if(id==="2") { document.getElementById('puzzle2').style.display='block'; let v=document.getElementById('puzzleVideo'); v.src=assets.puzzle2Video; v.play(); startTimer(2,20); } 
+    else if(id==="3") { document.getElementById('puzzle3').style.display='block'; } }
+function startTimer(id, t) { document.getElementById('timer'+id).innerText=t; currentTimer=setInterval(()=>{t--; document.getElementById('timer'+id).innerText=t; if(t<=0){clearInterval(currentTimer); failPuzzle(id);}},1000); }
+function solvePuzzle1() { let a=document.getElementById('ans1').value.toLowerCase(); clearInterval(currentTimer); document.getElementById('puzzle1').style.display='none'; controls.lock(); if(a!=="supercalifragilisticexpialidocious") triggerAggro(); }
+function solvePuzzle2() { let a=document.getElementById('ans2').value.toLowerCase(); clearInterval(currentTimer); document.getElementById('puzzleVideo').pause(); document.getElementById('puzzle2').style.display='none'; controls.lock(); if(a!=="congregation") triggerAggro(); }
+function failPuzzle(id) { document.getElementById('puzzle'+id).style.display='none'; controls.lock(); triggerAggro(); }
+function triggerAggro() { isAggro=true; agroAudio.play(); setTimeout(()=>{isAggro=false; agroAudio.stop();},15000); }
+function closeShop() { document.getElementById('shop').style.display='none'; controls.lock(); }
+function buySpeed() { if(coinsCollected>=10){coinsCollected-=10; document.getElementById('coinCount').innerText=coinsCollected; speedTimeLeft=60; closeShop();} else document.getElementById('shopWarning').style.display='block'; }
+function buyTracker() { if(coinsCollected>=10){coinsCollected-=10; document.getElementById('coinCount').innerText=coinsCollected; trackerTimeLeft=10; closeShop();} else document.getElementById('shopWarning').style.display='block'; }
+function showWarningText() { const d=document.createElement('div'); d.innerText="POWODZENIA..."; d.style.color='red'; d.style.fontSize='50px'; d.style.position='absolute'; d.style.top='100px'; d.style.left='50%'; d.style.transform='translateX(-50%)'; document.body.appendChild(d); setTimeout(()=>d.remove(),3000); }
+function triggerRealJumpscare() { gameWon=false; controls.unlock(); stopAllGameSounds(); document.getElementById('gameJumpscare').style.display='block'; document.getElementById('sndRealJumpscare').play(); setTimeout(()=>{document.getElementById('gameJumpscare').style.display='none'; document.getElementById('endScreen').style.display='block';},2000); }
+function winGame() { gameWon=true; controls.unlock(); stopAllGameSounds(); document.getElementById('endScreen').style.display='block'; }
+
 let prevTime = performance.now();
 function animate() {
-    requestAnimationFrame(animate); 
-    const time = performance.now(); const delta = (time - prevTime) / 1000; prevTime = time;
+    requestAnimationFrame(animate); const time = performance.now(); const delta = (time - prevTime) / 1000;
+    if(speedTimeLeft>0) { speedTimeLeft-=delta; speedMult=2.0; document.getElementById('speedTimeText').innerText=Math.ceil(speedTimeLeft); if(speedTimeLeft<=0) {speedMult=1.0; document.getElementById('uiSpeed').style.display='none';} } else document.getElementById('uiSpeed').style.display='none';
+    if(trackerTimeLeft>0) { trackerTimeLeft-=delta; document.getElementById('trackerTimeText').innerText=Math.ceil(trackerTimeLeft); nextbotMat.depthTest=false; if(trackerTimeLeft<=0) {nextbotMat.depthTest=true; document.getElementById('uiTracker').style.display='none';} } else document.getElementById('uiTracker').style.display='none';
+    if(bushCooldownTime>0) { bushCooldownTime-=delta; document.getElementById('bushTimeText').innerText=Math.ceil(bushCooldownTime); if(bushCooldownTime<=0) document.getElementById('uiBushCD').style.display='none'; } else document.getElementById('uiBushCD').style.display='none';
 
-    // UI Updates
-    if(speedTimeLeft>0) { speedTimeLeft-=delta; speedMult=2.0; document.getElementById('uiSpeed').style.display='block'; document.getElementById('speedTimeText').innerText=Math.ceil(speedTimeLeft); } 
-    else { speedMult=1.0; document.getElementById('uiSpeed').style.display='none'; }
-    if(trackerTimeLeft>0) { trackerTimeLeft-=delta; nextbotMat.depthTest=false; document.getElementById('uiTracker').style.display='block'; document.getElementById('trackerTimeText').innerText=Math.ceil(trackerTimeLeft); } 
-    else { nextbotMat.depthTest=true; document.getElementById('uiTracker').style.display='none'; }
-
-    // Logic
-    if ((controls.isLocked || (isMobile && gameStarted)) && !isHiding) {
-        let speed = (isSprinting ? 50.0 : 30.0) * speedMult;
-        
-        if (isMobile) {
-            // Mobile Movement (Manual Vector Calculation)
-            let mf = 0; let mr = 0;
-            if(moveForward) mf = speed * delta; if(moveBackward) mf = -speed * delta;
-            if(moveLeft) mr = -speed * delta; if(moveRight) mr = speed * delta;
-            
-            const fwd = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion); fwd.y=0; fwd.normalize();
-            const rgt = new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion); rgt.y=0; rgt.normalize();
-            
-            camera.position.addScaledVector(fwd, mf);
-            camera.position.addScaledVector(rgt, mr);
-        } else {
-            // PC Movement
-            velocity.x -= velocity.x * 10.0 * delta; velocity.z -= velocity.z * 10.0 * delta;
-            let dirZ = Number(moveForward)-Number(moveBackward); let dirX = Number(moveRight)-Number(moveLeft);
-            if(moveForward||moveBackward) velocity.z -= dirZ * speed * delta; 
-            if(moveLeft||moveRight) velocity.x -= dirX * speed * delta;
-            controls.moveRight(-velocity.x * delta); controls.moveForward(-velocity.z * delta);
-        }
-
-        // Gravity
+    if (controls.isLocked && !isHiding) {
+        velocity.x -= velocity.x * 10.0 * delta; velocity.z -= velocity.z * 10.0 * delta;
+        direction.z = Number(moveForward) - Number(moveBackward); direction.x = Number(moveRight) - Number(moveLeft); direction.normalize();
+        let baseMove = isSprinting ? 55.0 : 35.0; let finalMoveSpeed = baseMove * speedMult; 
+        if (moveForward || moveBackward) velocity.z -= direction.z * finalMoveSpeed * delta; if (moveLeft || moveRight) velocity.x -= direction.x * finalMoveSpeed * delta; 
+        controls.moveRight(-velocity.x * delta); controls.moveForward(-velocity.z * delta);
         velocityY += gravity * delta; camera.position.y += velocityY * delta;
-        let gh = getTerrainHeight(camera.position.x, camera.position.z);
-        if (camera.position.y < gh + 1.6) { camera.position.y = gh + 1.6; velocityY = 0; canJump = true; }
+        let groundHeight = getTerrainHeight(camera.position.x, camera.position.z); if (camera.position.y < groundHeight + 1.6) { camera.position.y = groundHeight + 1.6; velocityY = 0; canJump = true; }
 
-        // Bot Logic
-        let botSpeed = isAggro ? (isSecretMode ? 30 : 10) : (isSecretMode ? 14 : 4.5);
+        // KOLIZJE DRZEW
+        let key = getGridKey(camera.position.x, camera.position.z);
+        let trees = treeCollisionGrid[key] || [];
+        for(let i=0; i<trees.length; i++) { let t=trees[i]; let dx=camera.position.x-t.x; let dz=camera.position.z-t.z; let distSq=dx*dx+dz*dz; if(distSq<0.36) { let dist=Math.sqrt(distSq); if(dist<0.01) dist=0.01; let push=0.6-dist; camera.position.x+=dx/dist*push; camera.position.z+=dz/dist*push; } }
+
+        // NEXTBOT LOGIC
+        let bs = isAggro ? (isSecretMode ? 30 : 12) : (isSecretMode ? 14 : 5); 
         const moveBot = (bot) => {
-            let dir = new THREE.Vector3().subVectors(camera.position, bot.position); dir.y=0; dir.normalize();
-            bot.position.addScaledVector(dir, botSpeed * delta);
-            bot.position.y = getTerrainHeight(bot.position.x, bot.position.z) + 2.2;
+            let vec = new THREE.Vector3().subVectors(camera.position, bot.position); vec.y = 0; vec.normalize();
+            bot.position.addScaledVector(vec, bs * delta);
+            bot.position.y = getTerrainHeight(bot.position.x, bot.position.z) + 2.2; 
             if(bot.position.distanceTo(camera.position) < 2) triggerRealJumpscare();
         };
-        moveBot(nextbot); extraNextbots.forEach(b => moveBot(b));
+        moveBot(nextbot); extraNextbots.forEach(clone => moveBot(clone));
+        coins.forEach(c => c.rotation.y += delta * 2);
     }
-
-    renderer.render(scene, camera);
+    if(isHiding) { nextbot.position.y = getTerrainHeight(nextbot.position.x, nextbot.position.z) + 2.2; extraNextbots.forEach(clone => clone.position.y = getTerrainHeight(clone.position.x, clone.position.z) + 2.2); }
+    prevTime = time; renderer.render(scene, camera);
 }
 </script>
 </body>
