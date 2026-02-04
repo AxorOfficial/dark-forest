@@ -2,9 +2,10 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Ucieczka z Mrocznego Lasu - FINAL (CHAOS MODE)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ucieczka z Mrocznego Lasu - FINAL (MOBILE + PC)</title>
     <style>
-        body { margin: 0; overflow: hidden; background: black; font-family: 'Courier New', Courier, monospace; color: white; user-select: none; }
+        body { margin: 0; overflow: hidden; background: black; font-family: 'Courier New', Courier, monospace; color: white; user-select: none; touch-action: none; }
         
         #introWarning { position: absolute; width: 100%; height: 100%; background: black; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         #acceptWarningBtn { pointer-events: none; opacity: 0; transition: opacity 1s; padding: 15px 30px; font-size: 20px; font-weight: bold; background: red; color: white; border: none; cursor: pointer; border-radius: 5px; margin-top: 30px;}
@@ -15,7 +16,7 @@
         #gameJumpscare { display: none; position: absolute; width: 100%; height: 100%; background: black; z-index: 2000; background-image: url('jumpscare.png'); background-size: contain; background-repeat: no-repeat; background-position: center; }
         
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        #instructions { font-size: 24px; cursor: pointer; text-align: center; }
+        #instructions { font-size: 24px; cursor: pointer; text-align: center; padding: 20px; }
         
         #ui { position: absolute; top: 10px; left: 10px; z-index: 50; font-size: 20px; text-shadow: 2px 2px 2px black; pointer-events: none; }
         .ui-item { margin-bottom: 5px; }
@@ -35,22 +36,36 @@
         
         #gdCanvas { border: 2px solid white; background: #222; margin-top: 10px; display: none; cursor: crosshair; }
         #osuCanvas { border: 2px solid white; background: #111; margin-top: 10px; display: block; }
+
+        /* --- MOBILE CONTROLS CSS --- */
+        #mobileControls { display: none; position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 150; pointer-events: none; }
+        
+        /* Lewa strefa - Joystick */
+        #joystickZone { position: absolute; bottom: 50px; left: 50px; width: 150px; height: 150px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); pointer-events: auto; }
+        #joystickKnob { position: absolute; top: 50%; left: 50%; width: 50px; height: 50px; background: rgba(255, 255, 255, 0.5); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+
+        /* Prawa strefa - Przyciski */
+        #actionButtons { position: absolute; bottom: 30px; right: 30px; display: flex; gap: 15px; pointer-events: auto; flex-direction: column-reverse; align-items: flex-end; }
+        .mob-btn { width: 70px; height: 70px; background: rgba(255, 255, 255, 0.2); border: 2px solid white; border-radius: 50%; color: white; font-size: 30px; display: flex; justify-content: center; align-items: center; touch-action: manipulation; user-select: none; }
+        .mob-btn:active { background: rgba(255, 255, 255, 0.5); }
+        .mob-btn-big { width: 90px; height: 90px; font-size: 40px; background: rgba(255, 0, 0, 0.3); } /* Interact */
+
+        /* Prawa strona ekranu do obracania kamery (niewidzialna) */
+        #lookZone { position: absolute; top: 0; right: 0; width: 50%; height: 70%; z-index: 140; pointer-events: auto; }
     </style>
 </head>
 <body>
-
     <div id="introWarning">
         <h1 style="color: red;">⚠️ OSTRZEŻENIE ⚠️</h1>
         <p>Ta gra zawiera nagłe, głośne dźwięki oraz jumpscare'y.</p>
-        <button id="acceptWarningBtn">CZY NA PEWNO CHCESZ WEJŚĆ?</button>
-        <p style="margin-top: 20px; color: gray;">[Wciśnij ENTER aby pominąć intro]</p>
+        <button id="acceptWarningBtn">DOTKNIJ ABY ROZPOCZĄĆ</button>
+        <p style="margin-top: 20px; color: gray;">[PC: ENTER | Mobile: Dotknij, aby pominąć]</p>
     </div>
 
     <div id="calibrationScreen">
         <h2>Krok 1: Kalibracja Dźwięku</h2>
         <p>Podkręć głośność w słuchawkach, aż usłyszysz ciche cykanie świerszczy...</p>
         <p style="margin-top: 30px; color: gray;">Kalibracja trwa: <span id="calibTimer">0</span>%</p>
-        <p style="margin-top: 50px; color: #444;">[Wciśnij ENTER aby pominąć]</p>
     </div>
 
     <div id="firstJumpscare"></div>
@@ -66,13 +81,25 @@
         </div>
     </div>
 
+    <div id="mobileControls">
+        <div id="joystickZone">
+            <div id="joystickKnob"></div>
+        </div>
+        <div id="actionButtons">
+            <div class="mob-btn" id="btnJump">⬆️</div>
+            <div class="mob-btn mob-btn-big" id="btnInteract">🖐️</div>
+            <div class="mob-btn" id="btnSprint">🏃</div>
+        </div>
+    </div>
+    <div id="lookZone"></div>
+
     <div id="crosshair"></div>
 
     <div id="blocker">
         <div id="instructions">
             <h1 id="mainTitle">Mroczny Las</h1>
-            <p>Kliknij w tło, aby rozpocząć grę</p>
-            <p style="font-size: 14px;">WSAD - Ruch | SHIFT - Sprint | SPACJA - Skok | E - Interakcja</p>
+            <p>Kliknij / Dotknij, aby grać</p>
+            <p id="pcControls" style="font-size: 14px;">WSAD - Ruch | SHIFT - Sprint | SPACJA - Skok | E - Interakcja</p>
             <div id="secretInput">
                 <p>???</p>
                 <input type="text" id="secretCode" placeholder="Wpisz kod..." maxlength="5">
@@ -100,7 +127,7 @@
 
     <div id="puzzle3" class="overlay">
         <h2>Zagadka #3 - Wave</h2>
-        <p>Przetrwaj 10 sekund! (Przytrzymaj MYSZ, by lecieć w górę)</p>
+        <p>Przetrwaj 10 sekund! (Przytrzymaj, by lecieć w górę)</p>
         <canvas id="gdCanvas" width="400" height="300"></canvas>
         <button id="startGdBtn" onclick="startGD()">Start</button>
         <p id="timer3" style="color: red;"></p>
@@ -108,7 +135,7 @@
 
     <div id="osuOverlay" class="overlay">
         <h2 style="color: lime;">🤫 UKRYWASZ SIĘ 🤫</h2>
-        <p style="font-size: 14px;">Bądź cicho i trafiaj w nuty! Klawisze: <b>D F J K</b></p>
+        <p style="font-size: 14px;">Bądź cicho i trafiaj w nuty! PC: D F J K | Mobile: Dotknij pasków</p>
         <p>Celność: <span id="osuAcc">100</span>% (Min. 85%) | Czas: <span id="osuTimerText">15</span>s</p>
         <canvas id="osuCanvas" width="400" height="500"></canvas>
     </div>
@@ -134,8 +161,14 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
-
 <script>
+// --- DETEKCJA MOBILNA ---
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+if(isMobile) {
+    document.getElementById('mobileControls').style.display = 'block';
+    document.getElementById('pcControls').innerText = "Sterowanie dotykowe aktywne";
+}
+
 // --- MASTER AUDIO CONTROLLER ---
 function stopAllGameSounds() {
     if(ambientAudio && ambientAudio.isPlaying) ambientAudio.stop();
@@ -145,7 +178,7 @@ function stopAllGameSounds() {
     let fakeJumpscare = document.getElementById('sndFakeJumpscare'); fakeJumpscare.pause(); fakeJumpscare.currentTime = 0;
 }
 
-// --- LOGIKA INTRO ---
+// --- LOGIKA INTRO I SKIPOWANIE (ENTER/TOUCH) ---
 let introFinished = false; let calibInterval = null; let calibTimeout1 = null; let calibTimeout2 = null;
 
 setTimeout(() => { const btn = document.getElementById('acceptWarningBtn'); btn.style.pointerEvents = "auto"; btn.style.opacity = "1"; }, 3000);
@@ -158,6 +191,8 @@ function skipIntro() {
     introFinished = true; animate(); 
 }
 window.addEventListener('keydown', function(e) { if (e.code === 'Enter' && !introFinished) skipIntro(); });
+// Skip na dotknięcie ekranu kalibracji (dla mobile)
+document.getElementById('calibrationScreen').addEventListener('touchstart', skipIntro);
 
 function startCalibration() {
     document.getElementById('calibrationScreen').style.display = 'flex';
@@ -186,7 +221,7 @@ const controls = new THREE.PointerLockControls(camera, document.body);
 const blocker = document.getElementById('blocker'); const instructions = document.getElementById('instructions');
 const secretInputDiv = document.getElementById('secretInput'); secretInputDiv.addEventListener('click', function(event) { event.stopPropagation(); });
 
-// AUDIO
+// AUDIO LOADER
 const audioListener = new THREE.AudioListener(); camera.add(audioListener);
 const audioLoader = new THREE.AudioLoader(); 
 const ambientAudio = new THREE.Audio(audioListener);
@@ -199,18 +234,13 @@ audioLoader.load(assets.ambientSound, function(buffer) { ambientAudio.setBuffer(
 audioLoader.load(assets.nextbotSound, function(buffer) { nextbotAudio.setBuffer(buffer); nextbotAudio.setRefDistance(20); nextbotAudio.setLoop(true); nextbotAudio.setVolume(1.0); isBotAudioLoaded = true; }, undefined, function(err) { alert("BŁĄD: Nie znaleziono pliku " + assets.nextbotSound); }); 
 audioLoader.load(assets.agroSound, function(buffer) { agroAudio.setBuffer(buffer); agroAudio.setLoop(true); });
 
-// --- SYSTEM SEKRETÓW I CHAOS MODE ---
-let extraNextbots = []; // Tablica na klony
-
+// --- SYSTEM SEKRETÓW ---
+let extraNextbots = []; 
 function checkSecret() { 
     const code = document.getElementById('secretCode').value; 
-    
-    // CHAOS MODE (EASTER EGG)
     if (code === "...") {
-        isAggro = true; // Wszyscy wściekli
-        alert("⚠️ CHAOS MODE ACTIVATED: 10 NEXTBOTÓW! POWODZENIA... XD");
-        
-        // Spawnujemy 9 dodatkowych botów
+        isAggro = true; 
+        alert("⚠️ CHAOS MODE ACTIVATED: 10 NEXTBOTÓW!");
         for(let i=0; i<9; i++) {
             let clone = nextbot.clone();
             let rx = (Math.random() - 0.5) * 1000;
@@ -220,7 +250,6 @@ function checkSecret() {
             extraNextbots.push(clone);
         }
     }
-    // SECRET MODE (HARDCORE)
     else if(code === "81ZJA") { 
         isSecretMode = true; 
         if(nextbotAudio.isPlaying) nextbotAudio.stop();
@@ -228,38 +257,40 @@ function checkSecret() {
         assets.nextbotImg = 'nextbot2.png'; 
         assets.nextbotSound = 'nextbotsound2.mp3'; 
         assets.agroSound = 'agro2.mp3'; 
-        
-        // Update głównego bota
         textureLoader.load(assets.nextbotImg, function(tex) { 
             nextbotMat.map = tex; 
             let ar = tex.image.width / tex.image.height; 
             nextbot.scale.set(6 * ar, 6, 1); 
-            // Update wszystkich klonów jeśli już istnieją
-            extraNextbots.forEach(clone => {
-               clone.material = nextbotMat;
-               clone.scale.set(6 * ar, 6, 1); 
-            });
+            extraNextbots.forEach(clone => { clone.material = nextbotMat; clone.scale.set(6 * ar, 6, 1); });
         }); 
-        
         audioLoader.load(assets.nextbotSound, function(buffer) { 
             nextbotAudio.setBuffer(buffer); 
             nextbotAudio.setRefDistance(25); 
             if(gameStarted) nextbotAudio.play(); 
         }, undefined, function(err) { alert("Brak pliku " + assets.nextbotSound); }); 
-        
         audioLoader.load(assets.agroSound, function(buffer) { agroAudio.setBuffer(buffer); }); 
         alert("SECRET MODE ACTIVATED: DIFFICULTY EXTREME"); 
     } 
 }
 
-document.addEventListener('click', function() {
+// --- OBSŁUGA STARTU I KLIKNIĘĆ (PC & MOBILE) ---
+function startGameLogic() {
     if(!introFinished) return;
     if (audioListener.context.state === 'suspended') audioListener.context.resume();
     if (isAmbientLoaded && !ambientAudio.isPlaying) ambientAudio.play();
     if (isBotAudioLoaded && !nextbotAudio.isPlaying) nextbotAudio.play();
-});
+}
+
+document.addEventListener('click', startGameLogic);
+document.addEventListener('touchstart', startGameLogic);
 
 instructions.addEventListener('click', function () { if(introFinished && !isHiding) controls.lock(); });
+blocker.addEventListener('touchstart', function() { 
+    if(introFinished && !isHiding) {
+        blocker.style.display = 'none';
+        gameStarted = true;
+    }
+});
 
 controls.addEventListener('lock', function () {
     blocker.style.display = 'none';
@@ -374,7 +405,7 @@ for(let i=0; i<20; i++) {
     npcGroup.position.set(npcX, getTerrainHeight(npcX, npcZ), npcZ); npcGroup.name = "npc"; scene.add(npcGroup); interactables.push(npcGroup);
 }
 
-// NEXTBOT (GŁÓWNY)
+// NEXTBOT
 let nextbotMat = new THREE.SpriteMaterial({ color: 0xff0000 }); 
 let nextbot = new THREE.Sprite(nextbotMat); 
 nextbot.renderOrder = 999; 
@@ -383,20 +414,88 @@ nextbot.scale.set(6, 6, 1);
 nextbot.position.set(nbX, getTerrainHeight(nbX, nbZ) + 2.2, nbZ); 
 scene.add(nextbot);
 
-textureLoader.load(assets.nextbotImg, function(texture) {
-    nextbotMat.map = texture;
-    nextbotMat.color.setHex(0xffffff); 
-    let aspectRatio = texture.image.width / texture.image.height;
-    nextbot.scale.set(6 * aspectRatio, 6, 1);
-}, undefined, function(err) {
-    alert("BŁĄD: Plik " + assets.nextbotImg + " nie istnieje lub źle się nazywa!");
-});
-
+textureLoader.load(assets.nextbotImg, function(texture) { nextbotMat.map = texture; nextbotMat.color.setHex(0xffffff); let aspectRatio = texture.image.width / texture.image.height; nextbot.scale.set(6 * aspectRatio, 6, 1); }, undefined, function(err) { alert("BŁĄD: Plik " + assets.nextbotImg + " nie istnieje lub źle się nazywa!"); });
 nextbot.add(nextbotAudio); 
 
+// --- LOGIKA DOTYKU ---
 let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false; const velocity = new THREE.Vector3(); const direction = new THREE.Vector3();
 let osuLaneFlash = [0, 0, 0, 0]; 
 
+// Wirtualny joystick
+const joystickZone = document.getElementById('joystickZone');
+const joystickKnob = document.getElementById('joystickKnob');
+let joystickActive = false;
+let joystickCenter = { x: 0, y: 0 };
+
+joystickZone.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    joystickActive = true;
+    const rect = joystickZone.getBoundingClientRect();
+    joystickCenter = { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
+    handleJoystick(e.touches[0]);
+});
+
+joystickZone.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if(joystickActive) handleJoystick(e.touches[0]);
+});
+
+joystickZone.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    joystickActive = false;
+    joystickKnob.style.top = '50%';
+    joystickKnob.style.left = '50%';
+    moveForward = moveBackward = moveLeft = moveRight = false;
+});
+
+function handleJoystick(touch) {
+    const deltaX = touch.clientX - joystickCenter.x;
+    const deltaY = touch.clientY - joystickCenter.y;
+    const distance = Math.min(Math.sqrt(deltaX*deltaX + deltaY*deltaY), 75);
+    const angle = Math.atan2(deltaY, deltaX);
+    
+    joystickKnob.style.left = (50 + (Math.cos(angle) * distance / 75) * 50) + '%';
+    joystickKnob.style.top = (50 + (Math.sin(angle) * distance / 75) * 50) + '%';
+
+    // Prosta interpretacja kierunków
+    moveForward = deltaY < -20;
+    moveBackward = deltaY > 20;
+    moveLeft = deltaX < -20;
+    moveRight = deltaX > 20;
+}
+
+// Przyciski akcji
+document.getElementById('btnJump').addEventListener('touchstart', (e) => { e.preventDefault(); if(canJump) { velocityY = jumpStrength; canJump = false; } });
+document.getElementById('btnInteract').addEventListener('touchstart', (e) => { e.preventDefault(); interact(); });
+document.getElementById('btnSprint').addEventListener('touchstart', (e) => { e.preventDefault(); isSprinting = true; });
+document.getElementById('btnSprint').addEventListener('touchend', (e) => { e.preventDefault(); isSprinting = false; });
+
+// Obracanie kamery
+const lookZone = document.getElementById('lookZone');
+let lastTouchX = 0;
+let lastTouchY = 0;
+
+lookZone.addEventListener('touchstart', (e) => {
+    lastTouchX = e.touches[0].clientX;
+    lastTouchY = e.touches[0].clientY;
+});
+
+lookZone.addEventListener('touchmove', (e) => {
+    if(!gameStarted || isHiding) return;
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - lastTouchX;
+    const deltaY = touch.clientY - lastTouchY;
+    
+    // Obrót (czułość)
+    camera.rotation.y -= deltaX * 0.005;
+    camera.rotation.x -= deltaY * 0.005;
+    camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.rotation.x));
+
+    lastTouchX = touch.clientX;
+    lastTouchY = touch.clientY;
+});
+
+// PC Sterowanie
 const onKeyDown = function (event) {
     if(!introFinished) return;
     if(isHiding) { 
@@ -419,6 +518,21 @@ const onKeyUp = function (event) {
 };
 document.addEventListener('keydown', onKeyDown); document.addEventListener('keyup', onKeyUp);
 
+// OSU TOUCH
+document.getElementById('osuCanvas').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if(!isHiding) return;
+    const rect = e.target.getBoundingClientRect();
+    for(let i=0; i<e.touches.length; i++) {
+        const x = e.touches[i].clientX - rect.left;
+        const lane = Math.floor(x / 100);
+        if(lane >= 0 && lane < 4) {
+            handleOsuInput(lane);
+            osuLaneFlash[lane] = 5;
+        }
+    }
+});
+
 const raycaster = new THREE.Raycaster();
 
 function interact() {
@@ -434,16 +548,17 @@ function interact() {
         else if(obj.name === "npc") { controls.unlock(); document.getElementById('shopCoins').innerText = coinsCollected; document.getElementById('shopWarning').style.display = 'none'; document.getElementById('shop').style.display = 'block'; }
         else if(obj.name === "secretTree") { alert("Na kartce wyryto dziwny kod: 81ZJA"); }
         else if(obj.name && obj.name.includes("button")) { triggerPuzzle(obj.name.replace("button", ""), obj); }
-        else if(obj.name === "door" && buttonsFound === 3) { winGame(); }
+        else if(obj.name === "door" && buttonsFound >= 3) { winGame(); }
         else if(obj.name === "hidingBush") { if(bushCooldownTime > 0) alert("Krzaki są jeszcze zablokowane!"); else startOsuGame(); }
     }
 }
 
-// --- OSU GAME ---
+// --- OPTIMIZED OSU GAME ---
 let osuGameActive = false; let osuLastTime = 0; let osuNotes = []; let osuHits = 0; let osuTotal = 0; let osuTimeLeft = 15;
 
 function startOsuGame() { 
-    controls.unlock(); isHiding = true; document.getElementById('osuOverlay').style.display = 'block'; 
+    if(!isMobile) controls.unlock(); 
+    isHiding = true; document.getElementById('osuOverlay').style.display = 'block'; 
     osuNotes = []; osuHits = 0; osuTotal = 0; osuLaneFlash = [0,0,0,0];
     document.getElementById('osuAcc').innerText = "100"; osuTimeLeft = 15; document.getElementById('osuTimerText').innerText = osuTimeLeft;
     osuGameActive = true; osuLastTime = performance.now(); requestAnimationFrame(osuLoop);
@@ -474,12 +589,13 @@ function updateOsuAccuracy() { if(osuTotal === 0) return; let acc = Math.round((
 
 function endOsuGame(forcedFail = null) { 
     osuGameActive = false; document.getElementById('osuOverlay').style.display = 'none'; isHiding = false; 
-    moveForward = moveBackward = moveLeft = moveRight = isSprinting = false; velocity.set(0, 0, 0); controls.lock(); 
+    moveForward = moveBackward = moveLeft = moveRight = isSprinting = false; velocity.set(0, 0, 0); 
+    if(!isMobile) controls.lock(); 
     let acc = osuTotal === 0 ? 100 : Math.round((osuHits / osuTotal) * 100); 
     if(forcedFail !== false && acc >= 85) { } else { bushCooldownTime = 180; document.getElementById('uiBushCD').style.display = 'block'; triggerAggro(); alert("Za dużo błędów! Narobiłeś hałasu w krzakach!"); } 
 }
 
-let currentTimer; function triggerPuzzle(id, obj) { controls.unlock(); if(obj) { scene.remove(obj); } buttonsFound++; document.getElementById('btnCount').innerText = buttonsFound; if(buttonsFound === 3) door.visible = true; if(id === "1") { document.getElementById('puzzle1').style.display = 'block'; new Audio(assets.puzzle1Sound).play(); startTimer(1, 20); } else if(id === "2") { document.getElementById('puzzle2').style.display = 'block'; let vid = document.getElementById('puzzleVideo'); vid.src = assets.puzzle2Video; vid.play(); startTimer(2, 20); } else if(id === "3") { document.getElementById('puzzle3').style.display = 'block'; } } function startTimer(puzzleId, timeLimit) { let timeLeft = timeLimit; document.getElementById('timer'+puzzleId).innerText = timeLeft; currentTimer = setInterval(() => { timeLeft--; document.getElementById('timer'+puzzleId).innerText = timeLeft; if(timeLeft <= 0) { clearInterval(currentTimer); failPuzzle(puzzleId); } }, 1000); } function solvePuzzle1() { let ans = document.getElementById('ans1').value.toLowerCase(); clearInterval(currentTimer); document.getElementById('puzzle1').style.display = 'none'; controls.lock(); if(ans !== "supercalifragilisticexpialidocious") triggerAggro(); } function solvePuzzle2() { let ans = document.getElementById('ans2').value.toLowerCase(); clearInterval(currentTimer); document.getElementById('puzzleVideo').pause(); document.getElementById('puzzle2').style.display = 'none'; controls.lock(); if(ans !== "congregation") triggerAggro(); } function failPuzzle(id) { document.getElementById('puzzle'+id).style.display = 'none'; controls.lock(); triggerAggro(); } function triggerAggro() { isAggro = true; agroAudio.play(); setTimeout(() => { isAggro = false; agroAudio.stop(); }, 15000); }
+let currentTimer; function triggerPuzzle(id, obj) { if(!isMobile) controls.unlock(); if(obj) { scene.remove(obj); } buttonsFound++; document.getElementById('btnCount').innerText = buttonsFound; if(buttonsFound >= 3) door.visible = true; if(id === "1") { document.getElementById('puzzle1').style.display = 'block'; new Audio(assets.puzzle1Sound).play(); startTimer(1, 20); } else if(id === "2") { document.getElementById('puzzle2').style.display = 'block'; let vid = document.getElementById('puzzleVideo'); vid.src = assets.puzzle2Video; vid.play(); startTimer(2, 20); } else if(id === "3") { document.getElementById('puzzle3').style.display = 'block'; } } function startTimer(puzzleId, timeLimit) { let timeLeft = timeLimit; document.getElementById('timer'+puzzleId).innerText = timeLeft; currentTimer = setInterval(() => { timeLeft--; document.getElementById('timer'+puzzleId).innerText = timeLeft; if(timeLeft <= 0) { clearInterval(currentTimer); failPuzzle(puzzleId); } }, 1000); } function solvePuzzle1() { let ans = document.getElementById('ans1').value.toLowerCase(); clearInterval(currentTimer); document.getElementById('puzzle1').style.display = 'none'; if(!isMobile) controls.lock(); if(ans !== "supercalifragilisticexpialidocious") triggerAggro(); } function solvePuzzle2() { let ans = document.getElementById('ans2').value.toLowerCase(); clearInterval(currentTimer); document.getElementById('puzzleVideo').pause(); document.getElementById('puzzle2').style.display = 'none'; if(!isMobile) controls.lock(); if(ans !== "congregation") triggerAggro(); } function failPuzzle(id) { document.getElementById('puzzle'+id).style.display = 'none'; if(!isMobile) controls.lock(); triggerAggro(); } function triggerAggro() { isAggro = true; agroAudio.play(); setTimeout(() => { isAggro = false; agroAudio.stop(); }, 15000); }
 
 // --- GD WAVE ---
 let gdGameActive = false; let gdLastTime = 0; let gdTimeLeft = 10; let gdY = 150; let gdIsHolding = false; let gdObstacles = []; let gdTrail = [];
@@ -487,7 +603,10 @@ let gdGameActive = false; let gdLastTime = 0; let gdTimeLeft = 10; let gdY = 150
 function startGD() { 
     document.getElementById('startGdBtn').style.display = 'none'; document.getElementById('gdCanvas').style.display = 'block'; const canvas = document.getElementById('gdCanvas'); 
     gdGameActive = true; gdY = 150; gdIsHolding = false; gdObstacles = []; gdTrail = []; gdTimeLeft = 10; document.getElementById('timer3').innerText = gdTimeLeft;
-    canvas.onmousedown = () => gdIsHolding = true; canvas.onmouseup = () => gdIsHolding = false; 
+    const startHold = () => gdIsHolding = true; const endHold = () => gdIsHolding = false;
+    canvas.onmousedown = startHold; canvas.onmouseup = endHold;
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startHold(); });
+    canvas.addEventListener('touchend', (e) => { e.preventDefault(); endHold(); });
     gdLastTime = performance.now(); requestAnimationFrame(gdLoop);
 }
 
@@ -495,7 +614,7 @@ function gdLoop(time) {
     if (!gdGameActive) return;
     let delta = (time - gdLastTime) / 1000; gdLastTime = time;
     if (Math.floor(gdTimeLeft) > Math.floor(gdTimeLeft - delta)) document.getElementById('timer3').innerText = Math.ceil(gdTimeLeft - delta);
-    gdTimeLeft -= delta; if(gdTimeLeft <= 0) { gdGameActive = false; document.getElementById('puzzle3').style.display = 'none'; controls.lock(); return; }
+    gdTimeLeft -= delta; if(gdTimeLeft <= 0) { gdGameActive = false; document.getElementById('puzzle3').style.display = 'none'; if(!isMobile) controls.lock(); return; }
     const canvas = document.getElementById('gdCanvas'); const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,400,300); 
     const waveSpeedY = 300 * delta; if(gdIsHolding) gdY -= waveSpeedY; else gdY += waveSpeedY; 
     const waveX = 57.5; const waveY = gdY + 7.5; 
@@ -514,9 +633,9 @@ function gdLoop(time) {
     requestAnimationFrame(gdLoop);
 }
 
-function closeShop() { document.getElementById('shop').style.display = 'none'; controls.lock(); } function buySpeed() { if(coinsCollected >= 10) { coinsCollected -= 10; document.getElementById('coinCount').innerText = coinsCollected; speedTimeLeft = 60; document.getElementById('uiSpeed').style.display = 'block'; closeShop(); } else { document.getElementById('shopWarning').style.display = 'block'; } } function buyTracker() { if(coinsCollected >= 10) { coinsCollected -= 10; document.getElementById('coinCount').innerText = coinsCollected; trackerTimeLeft = 10; nextbotMat.color.setHex(0xff0000); nextbotMat.depthTest = false; document.getElementById('uiTracker').style.display = 'block'; closeShop(); } else { document.getElementById('shopWarning').style.display = 'block'; } } function showWarningText() { const d = document.createElement('div'); d.innerText = "Good luck..."; d.style.position = 'absolute'; d.style.color = 'red'; d.style.fontSize = '50px'; d.style.top = '100px'; d.style.left = '50%'; d.style.transform = 'translateX(-50%)'; d.style.zIndex = 100; document.body.appendChild(d); setTimeout(() => d.remove(), 3000); }
+function closeShop() { document.getElementById('shop').style.display = 'none'; if(!isMobile) controls.lock(); } function buySpeed() { if(coinsCollected >= 10) { coinsCollected -= 10; document.getElementById('coinCount').innerText = coinsCollected; speedTimeLeft = 60; document.getElementById('uiSpeed').style.display = 'block'; closeShop(); } else { document.getElementById('shopWarning').style.display = 'block'; } } function buyTracker() { if(coinsCollected >= 10) { coinsCollected -= 10; document.getElementById('coinCount').innerText = coinsCollected; trackerTimeLeft = 10; nextbotMat.color.setHex(0xff0000); nextbotMat.depthTest = false; document.getElementById('uiTracker').style.display = 'block'; closeShop(); } else { document.getElementById('shopWarning').style.display = 'block'; } } function showWarningText() { const d = document.createElement('div'); d.innerText = "Good luck..."; d.style.position = 'absolute'; d.style.color = 'red'; d.style.fontSize = '50px'; d.style.top = '100px'; d.style.left = '50%'; d.style.transform = 'translateX(-50%)'; d.style.zIndex = 100; document.body.appendChild(d); setTimeout(() => d.remove(), 3000); }
 
-function triggerRealJumpscare() { gameWon = false; controls.unlock(); stopAllGameSounds(); document.getElementById('gameJumpscare').style.display = 'block'; let realJumpscareSnd = document.getElementById('sndRealJumpscare'); realJumpscareSnd.volume = 1.0; let screamPromise = realJumpscareSnd.play(); if(screamPromise !== undefined) screamPromise.catch(e => console.warn("Brak dźwięku")); setTimeout(() => { document.getElementById('gameJumpscare').style.display = 'none'; document.getElementById('endTitle').innerText = "ZŁAPANY!"; document.getElementById('endSubtitle').innerText = "Nextbot cię dopadł."; document.getElementById('endScreen').style.display = 'block'; }, 2000); } function winGame() { gameWon = true; controls.unlock(); stopAllGameSounds(); document.getElementById('endScreen').style.display = 'block'; if(isSecretMode) { document.getElementById('endTitle').innerText = "SECRET ENDING"; document.getElementById('endSubtitle').innerText = "Przetrwałeś koszmar."; } }
+function triggerRealJumpscare() { gameWon = false; if(!isMobile) controls.unlock(); stopAllGameSounds(); document.getElementById('gameJumpscare').style.display = 'block'; let realJumpscareSnd = document.getElementById('sndRealJumpscare'); realJumpscareSnd.volume = 1.0; let screamPromise = realJumpscareSnd.play(); if(screamPromise !== undefined) screamPromise.catch(e => console.warn("Brak dźwięku")); setTimeout(() => { document.getElementById('gameJumpscare').style.display = 'none'; document.getElementById('endTitle').innerText = "ZŁAPANY!"; document.getElementById('endSubtitle').innerText = "Nextbot cię dopadł."; document.getElementById('endScreen').style.display = 'block'; }, 2000); } function winGame() { gameWon = true; if(!isMobile) controls.unlock(); stopAllGameSounds(); document.getElementById('endScreen').style.display = 'block'; if(isSecretMode) { document.getElementById('endTitle').innerText = "SECRET ENDING"; document.getElementById('endSubtitle').innerText = "Przetrwałeś koszmar."; } }
 
 let prevTime = performance.now();
 function animate() {
@@ -525,20 +644,53 @@ function animate() {
     if (trackerTimeLeft > 0) { trackerTimeLeft -= delta; document.getElementById('trackerTimeText').innerText = Math.ceil(trackerTimeLeft); if (trackerTimeLeft <= 0) { trackerTimeLeft = 0; nextbotMat.color.setHex(0xffffff); nextbotMat.depthTest = true; document.getElementById('uiTracker').style.display = 'none'; } }
     if (bushCooldownTime > 0) { bushCooldownTime -= delta; document.getElementById('bushTimeText').innerText = Math.ceil(bushCooldownTime); if (bushCooldownTime <= 0) { bushCooldownTime = 0; document.getElementById('uiBushCD').style.display = 'none'; } }
 
+    // PC MOVEMENT (tylko gdy pointer
+lock jest aktywny)
     if (controls.isLocked === true && !isHiding) {
         velocity.x -= velocity.x * 10.0 * delta; velocity.z -= velocity.z * 10.0 * delta;
         direction.z = Number(moveForward) - Number(moveBackward); direction.x = Number(moveRight) - Number(moveLeft); direction.normalize();
-        
         let baseMove = isSprinting ? 55.0 : 35.0; let finalMoveSpeed = baseMove * speedMult; 
         let moveX = 0; let moveZ = 0; 
         if (moveForward || moveBackward) moveZ = -direction.z * finalMoveSpeed * delta; 
         if (moveLeft || moveRight) moveX = -direction.x * finalMoveSpeed * delta; 
         velocity.x += moveX; velocity.z += moveZ;
+        controls.moveRight(-velocity.x * delta); controls.moveForward(-velocity.z * delta);
+        velocityY += gravity * delta; camera.position.y += velocityY * delta;
+    }
+    // MOBILE MOVEMENT (bez pointer lock)
+    else if (isMobile && gameStarted && !isHiding) {
+        let baseMove = isSprinting ? 55.0 : 35.0; let finalMoveSpeed = baseMove * speedMult;
+        let moveStep = finalMoveSpeed * delta;
+        
+        let actualMoveForward = 0;
+        let actualMoveRight = 0;
 
-        let nextX = camera.position.x - velocity.x * delta; let nextZ = camera.position.z - velocity.z * delta; 
+        if (moveForward) actualMoveForward = moveStep;
+        if (moveBackward) actualMoveForward = -moveStep;
+        if (moveLeft) actualMoveRight = -moveStep;
+        if (moveRight) actualMoveRight = moveStep;
+
+        // Manualne przesuwanie kamery na mobile (bo controls.move nie działa bez locka)
+        const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+        forward.y = 0; forward.normalize();
+        const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+        right.y = 0; right.normalize();
+
+        camera.position.addScaledVector(forward, actualMoveForward);
+        camera.position.addScaledVector(right, actualMoveRight);
+
+        // Kolizje i grawitacja dla mobile
+        velocityY += gravity * delta; camera.position.y += velocityY * delta;
+    }
+
+    if((controls.isLocked || (isMobile && gameStarted)) && !isHiding) {
+        // Kolizje z terenem
+        let groundHeight = getTerrainHeight(camera.position.x, camera.position.z); let playerHeight = 1.6;
+        if (camera.position.y < groundHeight + playerHeight) { camera.position.y = groundHeight + playerHeight; velocityY = 0; canJump = true; }
+
+        // Drzewa kolizje
         let currentGridKey = getGridKey(camera.position.x, camera.position.z);
         let treesToCheck = treeCollisionGrid[currentGridKey] || [];
-
         for(let step = 0; step < 3; step++) {
             for(let i = 0; i < treesToCheck.length; i++) {
                 let tree = treesToCheck[i]; let dx = camera.position.x - tree.x; let dz = camera.position.z - tree.z; let distSq = dx * dx + dz * dz;
@@ -546,18 +698,11 @@ function animate() {
             }
         }
 
-        controls.moveRight(-velocity.x * delta); controls.moveForward(-velocity.z * delta);
-        velocityY += gravity * delta; camera.position.y += velocityY * delta;
-        let groundHeight = getTerrainHeight(camera.position.x, camera.position.z); let playerHeight = 1.6;
-        if (camera.position.y < groundHeight + playerHeight) { camera.position.y = groundHeight + playerHeight; velocityY = 0; canJump = true; }
-
         // --- OBSŁUGA NEXTBOTA I JEGO KLONÓW ---
-        
-        let currentBaseSpeed = isSecretMode ? 14.0 : 5.5; 
+        let currentBaseSpeed = isSecretMode ? 14.0 : 4.5; 
         let currentAgroSpeed = isSecretMode ? 30.0 : 10.0; 
         let botSpeed = isAggro ? currentAgroSpeed : currentBaseSpeed; 
         
-        // Funkcja ruchu dla bota
         const moveBot = (bot) => {
             let botToPlayer = new THREE.Vector3().subVectors(camera.position, bot.position); 
             botToPlayer.y = 0; botToPlayer.normalize();
@@ -566,16 +711,11 @@ function animate() {
             if(bot.position.distanceTo(camera.position) < 2) { triggerRealJumpscare(); }
         };
 
-        // Ruch głównego bota
         moveBot(nextbot);
-
-        // Ruch klonów (jeśli są)
         extraNextbots.forEach(clone => moveBot(clone));
-
         coins.forEach(coinGroup => coinGroup.rotation.y += delta * 2);
     }
     
-    // Utrzymanie pozycji Y podczas chowania się
     if (isHiding) { 
         nextbot.position.y = getTerrainHeight(nextbot.position.x, nextbot.position.z) + 2.2; 
         extraNextbots.forEach(clone => clone.position.y = getTerrainHeight(clone.position.x, clone.position.z) + 2.2);
@@ -586,4 +726,3 @@ function animate() {
 </script>
 </body>
 </html>
-
