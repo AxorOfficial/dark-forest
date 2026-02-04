@@ -2,23 +2,23 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Ucieczka z Mrocznego Lasu - FULL PC VERSION</title>
+    <title>Mroczny Las - PC FINAL</title>
     <style>
         body { margin: 0; overflow: hidden; background: black; font-family: 'Courier New', Courier, monospace; color: white; user-select: none; }
         
-        /* INTRO I CUTSCENKI */
+        /* EKRANY */
         #introWarning { position: absolute; width: 100%; height: 100%; background: black; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        #acceptWarningBtn { pointer-events: none; opacity: 0; transition: opacity 1s; padding: 15px 30px; font-size: 20px; font-weight: bold; background: red; color: white; border: none; cursor: pointer; border-radius: 5px; margin-top: 30px;}
-        #acceptWarningBtn:hover { background: darkred; }
+        #acceptWarningBtn { padding: 15px 30px; font-size: 20px; font-weight: bold; background: darkred; color: white; border: 2px solid red; cursor: pointer; border-radius: 5px; margin-top: 30px; transition: 0.3s; }
+        #acceptWarningBtn:hover { background: red; transform: scale(1.1); }
 
         #calibrationScreen { display: none; position: absolute; width: 100%; height: 100%; background: black; z-index: 900; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         #firstJumpscare { display: none; position: absolute; width: 100%; height: 100%; background: black; z-index: 2000; background-image: url('jumpscarefirst.gif'); background-size: contain; background-repeat: no-repeat; background-position: center; }
         #gameJumpscare { display: none; position: absolute; width: 100%; height: 100%; background: black; z-index: 2000; background-image: url('jumpscare.png'); background-size: contain; background-repeat: no-repeat; background-position: center; }
         
-        /* MENU I UI */
         #blocker { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        #instructions { font-size: 24px; cursor: pointer; text-align: center; padding: 20px; }
+        #instructions { font-size: 24px; cursor: pointer; text-align: center; padding: 20px; border: 1px solid white; background: rgba(0,0,0,0.5); }
         
+        /* UI GRY */
         #ui { position: absolute; top: 10px; left: 10px; z-index: 50; font-size: 20px; text-shadow: 2px 2px 2px black; pointer-events: none; }
         .ui-item { margin-bottom: 5px; }
         #buffsContainer { margin-top: 15px; font-weight: bold; }
@@ -26,14 +26,14 @@
         .buff-tracker { color: red; display: none; }
         .debuff-bush { color: purple; display: none; } 
 
-        #crosshair { position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: white; border-radius: 50%; transform: translate(-50%, -50%); z-index: 50; pointer-events: none; }
+        #crosshair { position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; background: white; border-radius: 50%; transform: translate(-50%, -50%); z-index: 50; pointer-events: none; box-shadow: 0 0 5px white; }
         
-        /* MINIGRY I SKLEP */
-        .overlay { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20, 20, 20, 0.95); padding: 30px; border: 2px solid white; z-index: 200; text-align: center; border-radius: 10px; }
-        input[type="text"] { background: black; color: white; border: 1px solid white; padding: 10px; font-size: 16px; width: 80%; cursor: text; }
-        button { background: white; color: black; border: none; padding: 10px 20px; font-size: 18px; cursor: pointer; margin-top: 10px; }
-        button:hover { background: gray; }
-        #secretInput { margin-top: 20px; font-size: 12px; cursor: default; }
+        /* INTERAKCJE I MINIGRY */
+        .overlay { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(15, 15, 15, 0.98); padding: 30px; border: 2px solid white; z-index: 200; text-align: center; border-radius: 5px; min-width: 300px; }
+        input[type="text"] { background: #222; color: white; border: 1px solid white; padding: 10px; font-size: 16px; width: 80%; cursor: text; margin-top: 10px; }
+        button { background: white; color: black; border: none; padding: 10px 20px; font-size: 18px; cursor: pointer; margin-top: 15px; transition: 0.2s; }
+        button:hover { background: #bbb; }
+        #secretInput { margin-top: 20px; font-size: 14px; cursor: default; border-top: 1px solid #444; padding-top: 10px; }
         
         #gdCanvas { border: 2px solid white; background: #222; margin-top: 10px; display: none; cursor: crosshair; }
         #osuCanvas { border: 2px solid white; background: #111; margin-top: 10px; display: block; }
@@ -42,16 +42,16 @@
 <body>
 
     <div id="introWarning">
-        <h1 style="color: red;">⚠️ OSTRZEŻENIE ⚠️</h1>
-        <p>Ta gra zawiera nagłe, głośne dźwięki oraz jumpscare'y.</p>
-        <button id="acceptWarningBtn">ROZUMIEM, WCHODZĘ</button>
-        <p style="margin-top: 20px; color: gray;">[Kliknij przycisk, aby rozpocząć]</p>
+        <h1 style="color: red; text-shadow: 0 0 10px red;">⚠️ OSTRZEŻENIE ⚠️</h1>
+        <p>Ta gra zawiera nagłe, głośne dźwięki.</p>
+        <button id="acceptWarningBtn">WEJDŹ W MROK</button>
+        <p style="margin-top: 20px; color: gray;">[Wymagane słuchawki]</p>
     </div>
 
     <div id="calibrationScreen">
-        <h2>Krok 1: Kalibracja Dźwięku</h2>
-        <p>Podkręć głośność w słuchawkach, aż usłyszysz ciche cykanie świerszczy...</p>
-        <p style="margin-top: 30px; color: gray;">Kalibracja trwa: <span id="calibTimer">0</span>%</p>
+        <h2>Kalibracja Dźwięku</h2>
+        <p>Ustaw głośność tak, aby słyszeć ciche cykanie...</p>
+        <p style="margin-top: 30px; color: gray;">Ładowanie lasu: <span id="calibTimer">0</span>%</p>
     </div>
 
     <div id="firstJumpscare"></div>
@@ -62,8 +62,8 @@
         <div class="ui-item">🧩 Przyciski: <span id="btnCount">0</span>/3</div>
         <div id="buffsContainer">
             <div id="uiSpeed" class="buff-speed">⚡ Szybkość: <span id="speedTimeText">60</span>s</div>
-            <div id="uiTracker" class="buff-tracker">👁️ Lokalizator: <span id="trackerTimeText">10</span>s</div>
-            <div id="uiBushCD" class="debuff-bush">🚫 Krzaki Zablokowane: <span id="bushTimeText">180</span>s</div>
+            <div id="uiTracker" class="buff-tracker">👁️ Radar: <span id="trackerTimeText">10</span>s</div>
+            <div id="uiBushCD" class="debuff-bush">🚫 Krzaki: <span id="bushTimeText">180</span>s</div>
         </div>
     </div>
 
@@ -72,60 +72,40 @@
     <div id="blocker">
         <div id="instructions">
             <h1 id="mainTitle">Mroczny Las</h1>
-            <p>Kliknij, aby grać</p>
-            <p style="font-size: 14px;">WSAD - Ruch | SHIFT - Sprint | SPACJA - Skok | E - Interakcja</p>
+            <p>- Kliknij, aby grać -</p>
+            <p style="font-size: 14px; color: #aaa;">WSAD - Ruch | SHIFT - Sprint | E - Interakcja</p>
             <div id="secretInput">
-                <p>???</p>
-                <input type="text" id="secretCode" placeholder="Wpisz kod..." maxlength="5">
+                <p>Tajny Kod:</p>
+                <input type="text" id="secretCodeInput" placeholder="???" maxlength="5">
                 <button onclick="checkSecret()">Zastosuj</button>
             </div>
         </div>
     </div>
 
-    <div id="puzzle1" class="overlay">
-        <h2>Zagadka #1</h2>
-        <p>Masz 20 sekund! Posłuchaj dźwięku.</p>
-        <input type="text" id="ans1" placeholder="Wpisz odpowiedź...">
-        <button onclick="solvePuzzle1()">Zatwierdź</button>
-        <p id="timer1" style="color: red;">20</p>
-    </div>
-
-    <div id="puzzle2" class="overlay">
-        <h2>Zagadka #2</h2>
-        <p>Co to za level?</p>
-        <video id="puzzleVideo" width="300" height="200" controls></video>
-        <input type="text" id="ans2" placeholder="Wpisz odpowiedź...">
-        <button onclick="solvePuzzle2()">Zatwierdź</button>
-        <p id="timer2" style="color: red;">20</p>
-    </div>
-
-    <div id="puzzle3" class="overlay">
-        <h2>Zagadka #3 - Wave</h2>
-        <p>Przetrwaj 10 sekund! (Przytrzymaj myszkę)</p>
-        <canvas id="gdCanvas" width="400" height="300"></canvas>
-        <button id="startGdBtn" onclick="startGD()">Start</button>
-        <p id="timer3" style="color: red;"></p>
-    </div>
-
+    <div id="puzzle1" class="overlay"><h2>Zagadka #1</h2><p>Masz 20 sekund!</p><input type="text" id="ans1" placeholder="Odpowiedź..."><button onclick="solvePuzzle1()">Zatwierdź</button><p id="timer1" style="color: red;">20</p></div>
+    <div id="puzzle2" class="overlay"><h2>Zagadka #2</h2><p>Co to za poziom?</p><video id="puzzleVideo" width="300" height="200" controls></video><input type="text" id="ans2" placeholder="Odpowiedź..."><button onclick="solvePuzzle2()">Zatwierdź</button><p id="timer2" style="color: red;">20</p></div>
+    <div id="puzzle3" class="overlay"><h2>Zagadka #3 - Wave</h2><p>Trzymaj myszkę, by lecieć w górę!</p><canvas id="gdCanvas" width="400" height="300"></canvas><button id="startGdBtn" onclick="startGD()">Start</button><p id="timer3" style="color: red;"></p></div>
+    
     <div id="osuOverlay" class="overlay">
-        <h2 style="color: lime;">🤫 UKRYWASZ SIĘ 🤫</h2>
-        <p style="font-size: 14px;">Bądź cicho! Klikaj klawisze: D F J K</p>
-        <p>Celność: <span id="osuAcc">100</span>% (Min. 85%) | Czas: <span id="osuTimerText">15</span>s</p>
+        <h2 style="color: lime;">🤫 Cicho!</h2>
+        <p>Trafiaj w nuty w rytm, żeby nie hałasować.</p>
+        <p>Klawisze: <b>D F J K</b></p>
+        <p>Celność: <span id="osuAcc">100</span>% (Wymagane 85%)</p>
         <canvas id="osuCanvas" width="400" height="500"></canvas>
     </div>
 
     <div id="shop" class="overlay">
-        <h2>Tajemniczy Wędrowiec</h2>
-        <p>Posiadasz: <span id="shopCoins"></span> monet</p>
-        <p id="shopWarning" style="color: red; display: none;">Brakuje Ci monet!</p>
-        <button onclick="buySpeed()">Mikstura Szybkości (1 min) - 10 monet</button><br>
-        <button onclick="buyTracker()">Lokalizator Nextbota (10s) - 10 monet</button><br>
+        <h2>Wędrowiec</h2>
+        <p>Monety: <span id="shopCoins"></span></p>
+        <p id="shopWarning" style="color: red; display: none;">Brak monet!</p>
+        <button onclick="buySpeed()">Mikstura Szybkości (1 min) - 10g</button><br>
+        <button onclick="buyTracker()">Lokalizator Nextbota (10s) - 10g</button><br>
         <button onclick="closeShop()">Wyjdź</button>
     </div>
 
     <div id="endScreen" class="overlay">
-        <h1 id="endTitle">Uciekłeś!</h1>
-        <p id="endSubtitle">Wygrałeś grę.</p>
+        <h1 id="endTitle" style="color: gold; font-size: 40px;">UCIEKŁEŚ!</h1>
+        <p id="endSubtitle">Udało Ci się opuścić las.</p>
         <button onclick="location.reload()">Zagraj Ponownie</button>
     </div>
 
@@ -137,444 +117,370 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
 
 <script>
-// --- KONFIGURACJA ---
-// 13 000 drzew dla gęstego lasu (PC ONLY)
-const TREES_COUNT = 13000; 
+// --- KONFIGURACJA ROZGRYWKI ---
+const TREES_COUNT = 13000; // Dużo drzew (PC)
+const MAP_SIZE = 1200;
 
+// Generowanie losowego kodu sekretnego na tę sesję
+const SESSION_SECRET_CODE = Math.random().toString(36).substring(2, 7).toUpperCase();
+console.log("Secret Code (Debug):", SESSION_SECRET_CODE); // Dla Ciebie do testów w konsoli F12
+
+// Zmienne stanu
+let gameStarted = false; let introFinished = false; 
+let isSecretMode = false; let gameWon = false; 
+let hasFlashlight = false; let flashlightSpot;
+let buttonsFound = 0; let coinsCollected = 0; 
+let isAggro = false; let nextbotTrackerActive = false;
+let speedTimeLeft = 0; let trackerTimeLeft = 0; let speedMult = 1.0; 
+let bushCooldownTime = 0; let isHiding = false; 
+let isSprinting = false; let velocityY = 0; const gravity = -30.0; const jumpStrength = 12.0; let canJump = false; 
+
+// Assets
+let assets = { nextbotImg: 'nextbot.jpg', nextbotSound: 'nextbotsound.mp3', agroSound: 'agro.mp3', puzzle1Sound: 'zagadka1.mp3', puzzle2Video: 'wideo.mp4', ambientSound: 'ambient.mp3' };
+
+// --- INIT SILNIKA ---
 function stopAllGameSounds() {
     if(ambientAudio && ambientAudio.isPlaying) ambientAudio.stop();
     if(nextbotAudio && nextbotAudio.isPlaying) nextbotAudio.stop();
     if(agroAudio && agroAudio.isPlaying) agroAudio.stop();
-    let crickets = document.getElementById('sndCrickets'); crickets.pause(); crickets.currentTime = 0;
-    let fakeJumpscare = document.getElementById('sndFakeJumpscare'); fakeJumpscare.pause(); fakeJumpscare.currentTime = 0;
+    document.getElementById('sndCrickets').pause();
+    document.getElementById('sndFakeJumpscare').pause();
 }
 
-// --- LOGIKA CUTSCENKI (INTRO) ---
-let introFinished = false; let calibInterval; let calibTimeout1; let calibTimeout2;
-
-setTimeout(() => { const btn = document.getElementById('acceptWarningBtn'); btn.style.pointerEvents = "auto"; btn.style.opacity = "1"; }, 2000);
-
-document.getElementById('acceptWarningBtn').addEventListener('click', function() { 
-    document.getElementById('introWarning').style.display = 'none'; 
-    startCalibration(); 
+// Kalibracja
+let calibInterval, calibTimeout1, calibTimeout2;
+document.getElementById('acceptWarningBtn').addEventListener('click', () => {
+    document.getElementById('introWarning').style.display = 'none';
+    startCalibration();
 });
-
-function skipIntro() {
-    if(introFinished) return;
-    clearInterval(calibInterval); clearTimeout(calibTimeout1); clearTimeout(calibTimeout2); stopAllGameSounds();
-    document.getElementById('introWarning').style.display = 'none'; document.getElementById('calibrationScreen').style.display = 'none'; document.getElementById('firstJumpscare').style.display = 'none'; document.getElementById('blocker').style.display = 'flex';
-    introFinished = true; animate(); 
-}
-window.addEventListener('keydown', function(e) { if (e.code === 'Enter' && !introFinished) skipIntro(); });
 
 function startCalibration() {
     document.getElementById('calibrationScreen').style.display = 'flex';
-    let crickets = document.getElementById('sndCrickets'); crickets.volume = 0.1; 
-    let cricketPromise = crickets.play(); if (cricketPromise !== undefined) cricketPromise.catch(e => console.warn("Brak crickets.mp3"));
-    
-    let calibPercent = 0; 
-    calibInterval = setInterval(() => { 
-        calibPercent += Math.floor(Math.random() * 5); 
-        if(calibPercent > 99) calibPercent = 99; 
-        document.getElementById('calibTimer').innerText = calibPercent; 
-    }, 700);
-
-    calibTimeout1 = setTimeout(() => { 
-        clearInterval(calibInterval); crickets.pause(); crickets.currentTime = 0; 
-        document.getElementById('calibrationScreen').style.display = 'none'; 
-        document.getElementById('firstJumpscare').style.display = 'block'; 
-        let loudSnd = document.getElementById('sndFakeJumpscare'); loudSnd.volume = 1.0; 
-        let loudPromise = loudSnd.play(); if (loudPromise !== undefined) loudPromise.catch(e => console.warn("Brak jumpscare.mp3")); 
-        
-        calibTimeout2 = setTimeout(() => { 
-            loudSnd.pause(); loudSnd.currentTime = 0; 
-            document.getElementById('firstJumpscare').style.display = 'none'; 
-            document.getElementById('blocker').style.display = 'flex'; 
-            introFinished = true; 
-            animate(); 
-        }, 2500); 
-    }, 15000); 
+    let c = document.getElementById('sndCrickets'); c.volume = 0.1; c.play().catch(e=>{});
+    let p = 0; 
+    calibInterval = setInterval(() => { p += Math.floor(Math.random()*5); if(p>99)p=99; document.getElementById('calibTimer').innerText = p; }, 700);
+    calibTimeout1 = setTimeout(() => {
+        clearInterval(calibInterval); c.pause(); c.currentTime=0;
+        document.getElementById('calibrationScreen').style.display = 'none';
+        document.getElementById('firstJumpscare').style.display = 'block';
+        let f = document.getElementById('sndFakeJumpscare'); f.volume=1.0; f.play().catch(e=>{});
+        calibTimeout2 = setTimeout(() => {
+            f.pause(); f.currentTime=0;
+            document.getElementById('firstJumpscare').style.display = 'none';
+            document.getElementById('blocker').style.display = 'flex';
+            introFinished = true; animate();
+        }, 2500);
+    }, 15000);
 }
 
-// --- ZMIENNE GLOBALNE ---
-let isSecretMode = false; let gameWon = false; let hasFlashlight = false; let flashlightSpot;
-let buttonsFound = 0; let coinsCollected = 0; let isAggro = false; let nextbotTrackerActive = false;
-let gameStarted = false; 
-let speedTimeLeft = 0; let trackerTimeLeft = 0; let speedMult = 1.0; 
-let bushCooldownTime = 0; let isHiding = false; 
-let isSprinting = false; let velocityY = 0; const gravity = -30.0; const jumpStrength = 12.0; let canJump = false; 
-const gridCellSize = 20; const treeCollisionGrid = {}; 
-function getGridKey(x, z) { return Math.floor(x / gridCellSize) + "_" + Math.floor(z / gridCellSize); }
-
-let assets = { nextbotImg: 'nextbot.jpg', nextbotSound: 'nextbotsound.mp3', agroSound: 'agro.mp3', puzzle1Sound: 'zagadka1.mp3', puzzle2Video: 'wideo.mp4', ambientSound: 'ambient.mp3' };
-
-// THREE.JS SETUP
-const scene = new THREE.Scene(); scene.background = new THREE.Color(0x000000); scene.fog = new THREE.FogExp2(0x000000, 0.035);
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 300); camera.position.y = 1.5;
+// SCENA 3D
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x020202); scene.fog = new THREE.FogExp2(0x020202, 0.035);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 400); camera.position.y = 1.6;
 const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.shadowMap.enabled = true; document.body.appendChild(renderer.domElement);
 const controls = new THREE.PointerLockControls(camera, document.body);
-const blocker = document.getElementById('blocker'); const instructions = document.getElementById('instructions');
-
-// AUDIO
 const audioListener = new THREE.AudioListener(); camera.add(audioListener);
-const audioLoader = new THREE.AudioLoader(); 
+const audioLoader = new THREE.AudioLoader();
 const ambientAudio = new THREE.Audio(audioListener);
-const nextbotAudio = new THREE.PositionalAudio(audioListener); 
-const agroAudio = new THREE.Audio(audioListener); 
-let isAmbientLoaded = false; let isBotAudioLoaded = false;
+const nextbotAudio = new THREE.PositionalAudio(audioListener);
+const agroAudio = new THREE.Audio(audioListener);
 
-audioLoader.load(assets.ambientSound, function(buffer) { ambientAudio.setBuffer(buffer); ambientAudio.setLoop(true); ambientAudio.setVolume(0.15); isAmbientLoaded = true; }, undefined, function(err) { console.log("Info: Brak ambientu"); });
-audioLoader.load(assets.nextbotSound, function(buffer) { nextbotAudio.setBuffer(buffer); nextbotAudio.setRefDistance(20); nextbotAudio.setLoop(true); nextbotAudio.setVolume(1.0); isBotAudioLoaded = true; }, undefined, function(err) { console.log("Info: Brak dźwięku bota"); }); 
-audioLoader.load(assets.agroSound, function(buffer) { agroAudio.setBuffer(buffer); agroAudio.setLoop(true); });
+// Ładowanie Audio z pewnością zapętlenia
+let isAudioReady = false;
+audioLoader.load(assets.ambientSound, (b)=>{ ambientAudio.setBuffer(b); ambientAudio.setLoop(true); ambientAudio.setVolume(0.15); isAudioReady=true; });
+audioLoader.load(assets.nextbotSound, (b)=>{ nextbotAudio.setBuffer(b); nextbotAudio.setRefDistance(20); nextbotAudio.setLoop(true); nextbotAudio.setVolume(1.5); }); // Głośniejszy bot
+audioLoader.load(assets.agroSound, (b)=>{ agroAudio.setBuffer(b); agroAudio.setLoop(true); });
 
-// KLIKNIĘCIE STARTOWE (FIX)
-instructions.addEventListener('click', function () { 
+// KLIKNIĘCIE W GRĘ (START)
+const blocker = document.getElementById('blocker');
+const instructions = document.getElementById('instructions');
+instructions.addEventListener('click', ()=>{
     if(introFinished && !isHiding) {
-        controls.lock(); 
-        if (isAmbientLoaded && !ambientAudio.isPlaying) ambientAudio.play();
-        if (isBotAudioLoaded && !nextbotAudio.isPlaying && gameStarted) nextbotAudio.play();
+        controls.lock();
+        if(audioListener.context.state === 'suspended') audioListener.context.resume();
+        if(isAudioReady && !ambientAudio.isPlaying) ambientAudio.play();
+        if(!nextbotAudio.isPlaying && gameStarted) nextbotAudio.play(); // Start dźwięku bota dopiero jak gra ruszy
     }
 });
+controls.addEventListener('lock', ()=>{ blocker.style.display='none'; gameStarted=true; if(!nextbotAudio.isPlaying) nextbotAudio.play(); });
+controls.addEventListener('unlock', ()=>{ if(!gameWon && introFinished && !isHiding && document.getElementById('puzzle1').style.display !== 'block' && document.getElementById('shop').style.display !== 'block') blocker.style.display='flex'; });
 
-controls.addEventListener('lock', function () {
-    blocker.style.display = 'none';
-    if(isSecretMode && !gameWon) showWarningText();
-    gameStarted = true; 
-});
+// SWIATŁO I TEREN
+const ambientLight = new THREE.AmbientLight(0x080808); scene.add(ambientLight); // Bardzo ciemno
+flashlightSpot = new THREE.SpotLight(0xffffff, 0, 50, Math.PI/5, 0.3, 1); camera.add(flashlightSpot); camera.add(flashlightSpot.target); flashlightSpot.target.position.set(0,0,-1); scene.add(camera);
 
-controls.addEventListener('unlock', function () {
-    if(!gameWon && introFinished && !isHiding && document.getElementById('puzzle1').style.display !== 'block' && document.getElementById('puzzle2').style.display !== 'block' && document.getElementById('puzzle3').style.display !== 'block' && document.getElementById('shop').style.display !== 'block') {
-        blocker.style.display = 'flex';
-    }
-});
+function getTerrainHeight(x, z) { return Math.sin(x/12)*Math.cos(z/12)*2.5; }
+const texLoader = new THREE.TextureLoader();
+const floorTex = texLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg'); floorTex.wrapS=floorTex.wrapT=THREE.RepeatWrapping; floorTex.repeat.set(100,100);
+const terrainGeo = new THREE.PlaneGeometry(MAP_SIZE, MAP_SIZE, 256, 256);
+const pos = terrainGeo.attributes.position; for(let i=0;i<pos.count;i++) pos.setZ(i, getTerrainHeight(pos.getX(i), pos.getY(i)));
+terrainGeo.computeVertexNormals();
+const terrain = new THREE.Mesh(terrainGeo, new THREE.MeshStandardMaterial({map:floorTex, roughness:0.9, color:0x333333}));
+terrain.rotation.x = -Math.PI/2; scene.add(terrain);
 
-function createTextSprite(message) {
-    const canvas = document.createElement('canvas'); const context = canvas.getContext('2d');
-    canvas.width = 512; canvas.height = 128; context.font = "Bold 60px Courier New"; context.fillStyle = "rgba(255, 255, 255, 1.0)"; context.textAlign = "center"; context.textBaseline = "middle"; context.lineWidth = 4; context.strokeStyle = "black"; context.strokeText(message, 256, 64); context.fillText(message, 256, 64);
-    const texture = new THREE.CanvasTexture(canvas); const spriteMaterial = new THREE.SpriteMaterial({ map: texture }); const sprite = new THREE.Sprite(spriteMaterial); sprite.scale.set(3, 0.75, 1);
-    return sprite;
-}
+function createTextSprite(msg) { const c=document.createElement('canvas'); const x=c.getContext('2d'); c.width=512; c.height=128; x.font="Bold 60px Courier New"; x.fillStyle="white"; x.textAlign="center"; x.fillText(msg,256,64); const t=new THREE.CanvasTexture(c); const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t})); s.scale.set(3,0.75,1); return s; }
 
-function getTerrainHeight(x, z) { return Math.sin(x / 10) * Math.cos(z / 10) * 2; }
-
-const textureLoader = new THREE.TextureLoader(); const floorTexture = textureLoader.load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg'); floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; floorTexture.repeat.set(100, 100);
-const terrainGeo = new THREE.PlaneGeometry(1200, 1200, 200, 200); const posAttr = terrainGeo.attributes.position;
-for(let i=0; i<posAttr.count; i++) { let x = posAttr.getX(i); let y = posAttr.getY(i); let z = getTerrainHeight(x, y); posAttr.setZ(i, z); }
-terrainGeo.computeVertexNormals(); const terrainMat = new THREE.MeshStandardMaterial({ map: floorTexture, roughness: 0.9, color: 0x333333 }); const terrain = new THREE.Mesh(terrainGeo, terrainMat); terrain.rotation.x = -Math.PI / 2; terrain.receiveShadow = true; scene.add(terrain);
-
-const ambientLight = new THREE.AmbientLight(0x010101); scene.add(ambientLight);
-flashlightSpot = new THREE.SpotLight(0xffffff, 0, 40, Math.PI/5, 0.3, 1); flashlightSpot.position.set(0, 0, 0); flashlightSpot.target.position.set(0, 0, -1); camera.add(flashlightSpot); camera.add(flashlightSpot.target); scene.add(camera);
-
+// --- OBIEKTY ---
 const interactables = [];
+const treeCollisionGrid = {}; function getGridKey(x, z) { return Math.floor(x/20)+"_"+Math.floor(z/20); }
 
-const flashGroup = new THREE.Group(); const handleGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.25, 16); const handleMat = new THREE.MeshStandardMaterial({color: 0x222222, metalness: 0.8}); const handle = new THREE.Mesh(handleGeo, handleMat); handle.rotation.x = Math.PI/2; const headGeo = new THREE.CylinderGeometry(0.06, 0.05, 0.1, 16); const headMat = new THREE.MeshStandardMaterial({color: 0x888888, metalness: 0.5}); const head = new THREE.Mesh(headGeo, headMat); head.rotation.x = Math.PI/2; head.position.z = -0.15; flashGroup.add(handle); flashGroup.add(head); const flashLabel = createTextSprite("Latarka [E]"); flashLabel.position.y = 0.5; flashGroup.add(flashLabel);
-let flashX = 2, flashZ = -2; flashGroup.position.set(flashX, getTerrainHeight(flashX, flashZ) + 0.05, flashZ); flashGroup.name = "flashlight"; scene.add(flashGroup); interactables.push(flashGroup);
+// ROŚLINNOŚĆ
+const trunkGeo = new THREE.CylinderGeometry(0.4, 0.6, 6, 8); const trunkMat = new THREE.MeshStandardMaterial({color:0x1a0f00});
+const leafGeo = new THREE.ConeGeometry(2.5, 6, 8); const leafMat = new THREE.MeshStandardMaterial({color:0x001a00});
+const iTrunk = new THREE.InstancedMesh(trunkGeo, trunkMat, TREES_COUNT);
+const iLeaf = new THREE.InstancedMesh(leafGeo, leafMat, TREES_COUNT);
+const dummy = new THREE.Object3D();
 
-// --- GENEROWANIE LASU ---
-function addVegetation() {
-    const treeTrunkGeo = new THREE.CylinderGeometry(0.4, 0.6, 6, 8); const treeMat = new THREE.MeshStandardMaterial({color: 0x1a0f00, roughness: 1});
-    const leavesGeo = new THREE.ConeGeometry(2.5, 6, 8); const leavesMat = new THREE.MeshStandardMaterial({color: 0x001a00, roughness: 1});
-    const iTrunkMesh = new THREE.InstancedMesh(treeTrunkGeo, treeMat, TREES_COUNT);
-    const iLeafMesh = new THREE.InstancedMesh(leavesGeo, leavesMat, TREES_COUNT);
-    const dummy = new THREE.Object3D();
-
-    for(let i=0; i<TREES_COUNT; i++) {
-        let x = (Math.random() - 0.5) * 1100; let z = (Math.random() - 0.5) * 1100; let y = getTerrainHeight(x, z); 
-        let key = getGridKey(x, z);
-        if(!treeCollisionGrid[key]) treeCollisionGrid[key] = [];
-        treeCollisionGrid[key].push({x: x, z: z, radius: 0.60});
-        dummy.position.set(x, y + 2.5, z); dummy.rotation.y = Math.random() * Math.PI; dummy.updateMatrix(); iTrunkMesh.setMatrixAt(i, dummy.matrix);
-        dummy.position.set(x, y + 7.0, z); dummy.updateMatrix(); iLeafMesh.setMatrixAt(i, dummy.matrix);
-    }
-    scene.add(iTrunkMesh); scene.add(iLeafMesh);
-
-    const bushCount = 6000;
-    const bushGeo = new THREE.IcosahedronGeometry(1, 0); const bushMat = new THREE.MeshStandardMaterial({color: 0x002200, roughness: 1});
-    const iBushMesh = new THREE.InstancedMesh(bushGeo, bushMat, bushCount);
-    for(let i=0; i<bushCount; i++) {
-        let x = (Math.random() - 0.5) * 1100; let z = (Math.random() - 0.5) * 1100; let y = getTerrainHeight(x, z); 
-        dummy.position.set(x, y, z); dummy.scale.setScalar(0.5 + Math.random() * 0.5); dummy.rotation.set(Math.random(), Math.random(), Math.random()); dummy.updateMatrix(); iBushMesh.setMatrixAt(i, dummy.matrix);
-    }
-    scene.add(iBushMesh);
-
-    const hideBushGeo = new THREE.IcosahedronGeometry(2.5, 0); const hideBushMat = new THREE.MeshStandardMaterial({color: 0x003300, roughness: 1, emissive: 0x001100}); 
-    for(let i=0; i<30; i++) {
-        let x = (Math.random() - 0.5) * 1100; let z = (Math.random() - 0.5) * 1100; let y = getTerrainHeight(x, z); 
-        const bushGroup = new THREE.Group(); const bush = new THREE.Mesh(hideBushGeo, hideBushMat); bushGroup.add(bush);
-        const label = createTextSprite("Gęsty Krzak [E]"); label.position.y = 3; bushGroup.add(label);
-        bushGroup.position.set(x, y + 1.2, z); bushGroup.rotation.set(Math.random(), Math.random(), Math.random()); bushGroup.name = "hidingBush"; scene.add(bushGroup); interactables.push(bushGroup);
-    }
+for(let i=0; i<TREES_COUNT; i++) {
+    let x = (Math.random()-0.5)*1100; let z = (Math.random()-0.5)*1100;
+    // Oczyszczenie spawnu
+    if(Math.abs(x)<20 && Math.abs(z)<20) x+=50; 
+    let y = getTerrainHeight(x,z);
+    
+    let key = getGridKey(x,z); if(!treeCollisionGrid[key]) treeCollisionGrid[key]=[]; treeCollisionGrid[key].push({x:x,z:z,r:0.6});
+    
+    dummy.position.set(x,y+2.5,z); dummy.rotation.y=Math.random()*3; dummy.updateMatrix(); iTrunk.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(x,y+7,z); dummy.updateMatrix(); iLeaf.setMatrixAt(i,dummy.matrix);
 }
-addVegetation();
+scene.add(iTrunk); scene.add(iLeaf);
 
-let coins = []; function addCoins() { const coinGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.1, 16); const coinMat = new THREE.MeshStandardMaterial({color: 0xffd700, metalness: 0.8, emissive: 0xffaa00, emissiveIntensity: 0.8}); for(let i=0; i<250; i++) { let coinGroup = new THREE.Group(); let coinMesh = new THREE.Mesh(coinGeo, coinMat); coinMesh.rotation.x = Math.PI/2; coinGroup.add(coinMesh); let x = (Math.random()-0.5)*1000; let z = (Math.random()-0.5)*1000; coinGroup.position.set(x, getTerrainHeight(x,z) + 1.0, z); coinGroup.name = "coin"; scene.add(coinGroup); interactables.push(coinGroup); coins.push(coinGroup); } } addCoins();
+// KRZAKI (6000)
+const bushGeo = new THREE.IcosahedronGeometry(1,0); const bushMat = new THREE.MeshStandardMaterial({color:0x002200});
+const iBush = new THREE.InstancedMesh(bushGeo, bushMat, 6000);
+for(let i=0; i<6000; i++) { let x=(Math.random()-0.5)*1100; let z=(Math.random()-0.5)*1100; let y=getTerrainHeight(x,z); dummy.position.set(x,y,z); dummy.scale.setScalar(0.5+Math.random()); dummy.updateMatrix(); iBush.setMatrixAt(i,dummy.matrix); }
+scene.add(iBush);
 
-// BUTTONS (3 SZTUKI)
-function createButton(id) { 
-    const group = new THREE.Group(); 
-    const baseGeo = new THREE.BoxGeometry(0.8, 0.1, 0.8); const baseMat = new THREE.MeshStandardMaterial({color: 0x333333}); const base = new THREE.Mesh(baseGeo, baseMat); group.add(base); 
-    const btnGeo = new THREE.BoxGeometry(0.5, 0.2, 0.5); const btnMat = new THREE.MeshStandardMaterial({color: 0xff0000, emissive: 0x550000}); const btn = new THREE.Mesh(btnGeo, btnMat); btn.position.y = 0.15; group.add(btn); 
-    const light = new THREE.PointLight(0xff0000, 1, 3); light.position.y = 0.5; group.add(light); 
-    // BRAK LASERA DO NIEBA - TYLKO POŚWIATA
-    let x = (Math.random()-0.5)*1000; let z = (Math.random()-0.5)*1000; group.position.set(x, getTerrainHeight(x,z) + 0.05, z); group.name = "button" + id; scene.add(group); interactables.push(group); return group; 
-} 
-for(let i=1; i<=3; i++) createButton(i);
-
-const doorGeo = new THREE.BoxGeometry(2, 4, 0.2); const doorMat = new THREE.MeshStandardMaterial({color: 0xcccccc}); const door = new THREE.Mesh(doorGeo, doorMat); let doorX = 300, doorZ = 300; door.position.set(doorX, getTerrainHeight(doorX, doorZ) + 2, doorZ); door.visible = false; door.name = "door"; scene.add(door); interactables.push(door);
-
-const bodyGeo = new THREE.ConeGeometry(0.8, 2.5, 8); const bodyMat = new THREE.MeshStandardMaterial({color: 0x220044, roughness: 0.9}); 
-const headNpcGeo = new THREE.SphereGeometry(0.5, 16, 16); const headNpcMat = new THREE.MeshStandardMaterial({color: 0x110022}); 
-const npcLabelBase = createTextSprite("Sklepikarz [E]");
-
-for(let i=0; i<20; i++) { 
-    const npcGroup = new THREE.Group(); 
-    const body = new THREE.Mesh(bodyGeo, bodyMat); body.position.y = 1.25; npcGroup.add(body); 
-    const headNpc = new THREE.Mesh(headNpcGeo, headNpcMat); headNpc.position.y = 2.5; npcGroup.add(headNpc); 
-    const npcLabel = npcLabelBase.clone(); npcLabel.position.y = 3.5; npcGroup.add(npcLabel); 
-    let npcX = (Math.random()-0.5)*1000; let npcZ = (Math.random()-0.5)*1000; 
-    npcGroup.position.set(npcX, getTerrainHeight(npcX, npcZ), npcZ); npcGroup.name = "npc"; scene.add(npcGroup); interactables.push(npcGroup);
+// KRZAKI UKRYCIA (30)
+for(let i=0; i<30; i++) {
+    let x=(Math.random()-0.5)*1100; let z=(Math.random()-0.5)*1100; let y=getTerrainHeight(x,z);
+    const g=new THREE.Group(); 
+    g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(2.5,0), new THREE.MeshStandardMaterial({color:0x003300, emissive:0x001100})));
+    let l=createTextSprite("Krzak [E]"); l.position.y=3; g.add(l);
+    g.position.set(x,y+1.2,z); g.name="hidingBush"; scene.add(g); interactables.push(g);
 }
 
-// --- NEXTBOT I SPAWN FIX ---
-let nextbotMat = new THREE.SpriteMaterial({ color: 0xff0000 }); 
-let nextbot = new THREE.Sprite(nextbotMat); 
-nextbot.renderOrder = 999; 
-// SPAWN DALEKO OD GRACZA
-let nbX = 300; let nbZ = 300; 
-nextbot.scale.set(6, 6, 1); 
-nextbot.position.set(nbX, getTerrainHeight(nbX, nbZ) + 2.2, nbZ); 
+// 3 PRZYCISKI (ZNERFIONE - LOKALNA CZERWONA POŚWIATA, ALE BRAK LASERA)
+for(let i=1; i<=3; i++) {
+    const g = new THREE.Group();
+    const box = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.5), new THREE.MeshStandardMaterial({color:0xff0000, emissive:0x550000}));
+    const glow = new THREE.PointLight(0xff0000, 2, 40); // Zasięg 40 metrów - widać poświatę na drzewach
+    g.add(box); g.add(glow);
+    let x=(Math.random()-0.5)*1000; let z=(Math.random()-0.5)*1000;
+    g.position.set(x, getTerrainHeight(x,z)+0.5, z); g.name="button"+i;
+    scene.add(g); interactables.push(g);
+}
+
+// SKLEPIKARZE (15 SZTUK + FIOLETOWA POCHODNIA)
+const npcGeo = new THREE.ConeGeometry(0.8, 2.5, 8); const npcMat = new THREE.MeshStandardMaterial({color:0x330055});
+for(let i=0; i<15; i++) {
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(npcGeo, npcMat); body.position.y=1.25; g.add(body);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.5), new THREE.MeshStandardMaterial({color:0x110022})); head.position.y=2.5; g.add(head);
+    let l = createTextSprite("Sklep [E]"); l.position.y=3.5; g.add(l);
+    
+    // FIOLETOWA POCHODNIA
+    const torch = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,1.5), new THREE.MeshStandardMaterial({color:0x553311}));
+    torch.position.set(1, 0.75, 0); g.add(torch);
+    const flame = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshStandardMaterial({color:0xff00ff, emissive:0xff00ff}));
+    flame.position.set(1, 1.6, 0); g.add(flame);
+    const purpleLight = new THREE.PointLight(0xff00ff, 1.5, 20);
+    purpleLight.position.set(1, 1.6, 0); g.add(purpleLight);
+
+    let x=(Math.random()-0.5)*1000; let z=(Math.random()-0.5)*1000;
+    g.position.set(x, getTerrainHeight(x,z), z); g.name="npc";
+    scene.add(g); interactables.push(g);
+}
+
+// MONETY
+const coinGeo = new THREE.CylinderGeometry(0.3,0.3,0.1,16); const coinMat = new THREE.MeshStandardMaterial({color:0xffd700, emissive:0xffaa00});
+let coinGroups = [];
+for(let i=0; i<250; i++) {
+    let g = new THREE.Group(); let m = new THREE.Mesh(coinGeo, coinMat); m.rotation.x=Math.PI/2; g.add(m);
+    let x=(Math.random()-0.5)*1000; let z=(Math.random()-0.5)*1000;
+    g.position.set(x, getTerrainHeight(x,z)+1, z); g.name="coin";
+    scene.add(g); interactables.push(g); coinGroups.push(g);
+}
+
+// LATARKA (ITEM)
+const flashG = new THREE.Group(); 
+flashG.add(new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.3), new THREE.MeshStandardMaterial({color:0x222222})));
+let flL = createTextSprite("Latarka [E]"); flL.position.y=0.5; flashG.add(flL);
+flashG.position.set(5, getTerrainHeight(5,5)+0.5, 5); flashG.name="flashlight"; scene.add(flashG); interactables.push(flashG);
+
+// DRZEWO SEKRETNE (Z KODEM)
+const secretTree = new THREE.Group();
+const sTrunk = new THREE.Mesh(trunkGeo, trunkMat); sTrunk.position.y=2.5;
+const sLeaf = new THREE.Mesh(leafGeo, leafMat); sLeaf.position.y=7;
+const sPaper = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.4,0.05), new THREE.MeshStandardMaterial({color:0xffffff})); sPaper.position.set(0, 2.5, 0.45);
+secretTree.add(sTrunk); secretTree.add(sLeaf); secretTree.add(sPaper);
+let sx=(Math.random()-0.5)*900; let sz=(Math.random()-0.5)*900;
+secretTree.position.set(sx, getTerrainHeight(sx,sz), sz); secretTree.name="secretTree";
+scene.add(secretTree); interactables.push(secretTree);
+
+// DRZWI WYJŚCIA
+const door = new THREE.Mesh(new THREE.BoxGeometry(2,4,0.2), new THREE.MeshStandardMaterial({color:0xcccccc}));
+door.position.set(100, getTerrainHeight(100,100)+2, 100); door.visible=false; door.name="door"; scene.add(door); interactables.push(door);
+
+// --- NEXTBOT ---
+const nextbotMat = new THREE.SpriteMaterial({ color: 0xffffff });
+const nextbot = new THREE.Sprite(nextbotMat);
+nextbot.scale.set(6, 6, 1);
+// Spawn Bota Daleko (Bezpieczeństwo)
+nextbot.position.set(300, 5, 300);
 scene.add(nextbot);
+nextbot.add(nextbotAudio);
+texLoader.load(assets.nextbotImg, (t)=>{ 
+    nextbotMat.map=t; 
+    // Fix proporcji
+    let ar = t.image.width/t.image.height;
+    nextbot.scale.set(6*ar, 6, 1);
+});
 
-textureLoader.load(assets.nextbotImg, function(texture) { nextbotMat.map = texture; nextbotMat.color.setHex(0xffffff); let aspectRatio = texture.image.width / texture.image.height; nextbot.scale.set(6 * aspectRatio, 6, 1); }, undefined, function(err) { console.log("Brak img"); });
-nextbot.add(nextbotAudio); 
+// --- LOGIKA GRY ---
+function checkSecret() {
+    const code = document.getElementById('secretCodeInput').value.toUpperCase();
+    if(code === SESSION_SECRET_CODE) {
+        isSecretMode = true;
+        alert("TRYB SEKRETNY AKTYWOWANY: TRUDNOŚĆ EKSTREMALNA");
+        // Zmiana assetów
+        assets.nextbotImg = 'nextbot2.png'; assets.nextbotSound = 'nextbotsound2.mp3'; assets.agroSound = 'agro2.mp3';
+        texLoader.load(assets.nextbotImg, (t)=>{nextbotMat.map=t;});
+        audioLoader.load(assets.nextbotSound, (b)=>{nextbotAudio.setBuffer(b); if(gameStarted)nextbotAudio.play();});
+        audioLoader.load(assets.agroSound, (b)=>{agroAudio.setBuffer(b);});
+    } else {
+        alert("Zły kod.");
+    }
+}
 
-// --- STEROWANIE ---
-let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false; const velocity = new THREE.Vector3(); const direction = new THREE.Vector3();
-let osuLaneFlash = [0, 0, 0, 0]; 
-
-const onKeyDown = function (event) {
+// STEROWANIE
+let moveF=false, moveB=false, moveL=false, moveR=false; const velocity=new THREE.Vector3(); const direction=new THREE.Vector3();
+document.addEventListener('keydown', (e)=>{
     if(!introFinished) return;
-    if(isHiding) { 
-        if(event.code === 'KeyD') { handleOsuInput(0); osuLaneFlash[0] = 5; }
-        if(event.code === 'KeyF') { handleOsuInput(1); osuLaneFlash[1] = 5; }
-        if(event.code === 'KeyJ') { handleOsuInput(2); osuLaneFlash[2] = 5; }
-        if(event.code === 'KeyK') { handleOsuInput(3); osuLaneFlash[3] = 5; }
-        return; 
+    if(isHiding) {
+        // Obsługa OSU
+        if(e.code==='KeyD') handleOsuInput(0); if(e.code==='KeyF') handleOsuInput(1); if(e.code==='KeyJ') handleOsuInput(2); if(e.code==='KeyK') handleOsuInput(3);
+        return;
     }
-    switch (event.code) { 
-        case 'KeyW': moveForward = true; break; case 'KeyS': moveBackward = true; break; 
-        case 'KeyA': moveLeft = true; break; case 'KeyD': moveRight = true; break; 
-        case 'KeyE': interact(); break; 
-        case 'ShiftLeft': case 'ShiftRight': isSprinting = true; break; case 'Space': if(canJump) { velocityY = jumpStrength; canJump = false; } break; 
-    }
-};
-const onKeyUp = function (event) {
+    switch(e.code){ case 'KeyW': moveF=true; break; case 'KeyS': moveB=true; break; case 'KeyA': moveL=true; break; case 'KeyD': moveR=true; break; case 'ShiftLeft': isSprinting=true; break; case 'Space': if(canJump){velocityY=12; canJump=false;} break; case 'KeyE': interact(); break; }
+});
+document.addEventListener('keyup', (e)=>{
     if(isHiding) return;
-    switch (event.code) { case 'KeyW': moveForward = false; break; case 'KeyS': moveBackward = false; break; case 'KeyA': moveLeft = false; break; case 'KeyD': moveRight = false; break; case 'ShiftLeft': case 'ShiftRight': isSprinting = false; break; }
-};
-document.addEventListener('keydown', onKeyDown); document.addEventListener('keyup', onKeyUp);
+    switch(e.code){ case 'KeyW': moveF=false; break; case 'KeyS': moveB=false; break; case 'KeyA': moveL=false; break; case 'KeyD': moveR=false; break; case 'ShiftLeft': isSprinting=false; break; }
+});
 
 const raycaster = new THREE.Raycaster();
-
 function interact() {
     raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
     const intersects = raycaster.intersectObjects(interactables, true);
-
     if(intersects.length > 0 && intersects[0].distance < 4) {
-        let obj = intersects[0].object;
-        while(obj.parent && obj.parent.type !== 'Scene') { if(obj.name) break; obj = obj.parent; }
-
-        if(obj.name === "flashlight" && !hasFlashlight) { hasFlashlight = true; flashlightSpot.intensity = 2.5; scene.remove(obj); }
-        else if(obj.name === "coin") { coinsCollected++; document.getElementById('coinCount').innerText = coinsCollected; scene.remove(obj); interactables.splice(interactables.indexOf(obj), 1); coins.splice(coins.indexOf(obj), 1); }
-        else if(obj.name === "npc") { controls.unlock(); document.getElementById('shopCoins').innerText = coinsCollected; document.getElementById('shopWarning').style.display = 'none'; document.getElementById('shop').style.display = 'block'; }
-        else if(obj.name && obj.name.includes("button")) { triggerPuzzle(obj.name.replace("button", ""), obj); }
-        else if(obj.name === "door" && buttonsFound >= 3) { winGame(); }
-        else if(obj.name === "hidingBush") { if(bushCooldownTime > 0) alert("Krzaki są jeszcze zablokowane!"); else startOsuGame(); }
+        let obj = intersects[0].object; while(obj.parent && obj.parent.type!=='Scene') obj = obj.parent;
+        
+        if(obj.name==="flashlight" && !hasFlashlight) { hasFlashlight=true; flashlightSpot.intensity=2.5; scene.remove(obj); }
+        else if(obj.name==="coin") { coinsCollected++; document.getElementById('coinCount').innerText=coinsCollected; scene.remove(obj); }
+        else if(obj.name==="npc") { controls.unlock(); document.getElementById('shopCoins').innerText=coinsCollected; document.getElementById('shop').style.display='block'; }
+        else if(obj.name==="secretTree") { alert("Na korze wyryto: " + SESSION_SECRET_CODE); }
+        else if(obj.name && obj.name.includes("button")) { triggerPuzzle(obj.name.replace("button",""), obj); }
+        else if(obj.name==="door" && buttonsFound>=3) { winGame(); }
+        else if(obj.name==="hidingBush") { if(bushCooldownTime>0) alert("Zablokowane!"); else startOsuGame(); }
     }
 }
 
-let osuGameActive = false; let osuLastTime = 0; let osuNotes = []; let osuHits = 0; let osuTotal = 0; let osuTimeLeft = 15;
-
-function startOsuGame() { 
-    controls.unlock(); 
-    isHiding = true; document.getElementById('osuOverlay').style.display = 'block'; 
-    osuNotes = []; osuHits = 0; osuTotal = 0; osuLaneFlash = [0,0,0,0];
-    document.getElementById('osuAcc').innerText = "100"; osuTimeLeft = 15; document.getElementById('osuTimerText').innerText = osuTimeLeft;
-    osuGameActive = true; osuLastTime = performance.now(); requestAnimationFrame(osuLoop);
+// PUZZLE SYSTEM
+let currentTimer;
+function triggerPuzzle(id, obj) {
+    controls.unlock(); if(obj) scene.remove(obj); buttonsFound++; document.getElementById('btnCount').innerText=buttonsFound;
+    if(buttonsFound>=3) { door.visible=true; alert("DRZWI OTWARTE!"); }
+    if(id==="1") { document.getElementById('puzzle1').style.display='block'; new Audio(assets.puzzle1Sound).play(); startTimer(1,20); }
+    else if(id==="2") { document.getElementById('puzzle2').style.display='block'; let v=document.getElementById('puzzleVideo'); v.src=assets.puzzle2Video; v.play(); startTimer(2,20); }
+    else if(id==="3") { document.getElementById('puzzle3').style.display='block'; }
 }
+function startTimer(id, t) { document.getElementById('timer'+id).innerText=t; currentTimer=setInterval(()=>{t--; document.getElementById('timer'+id).innerText=t; if(t<=0){clearInterval(currentTimer); failPuzzle(id);}},1000); }
+function solvePuzzle1() { let a=document.getElementById('ans1').value.toLowerCase(); clearInterval(currentTimer); document.getElementById('puzzle1').style.display='none'; controls.lock(); if(a!=="supercalifragilisticexpialidocious") triggerAggro(); }
+function solvePuzzle2() { let a=document.getElementById('ans2').value.toLowerCase(); clearInterval(currentTimer); document.getElementById('puzzleVideo').pause(); document.getElementById('puzzle2').style.display='none'; controls.lock(); if(a!=="congregation") triggerAggro(); }
+function failPuzzle(id) { document.getElementById('puzzle'+id).style.display='none'; controls.lock(); triggerAggro(); }
+function triggerAggro() { isAggro=true; agroAudio.play(); setTimeout(()=>{isAggro=false; agroAudio.stop();},15000); }
 
-function osuLoop(time) {
-    if (!osuGameActive) return;
-    let delta = (time - osuLastTime) / 1000; osuLastTime = time;
-    if (Math.floor(osuTimeLeft) > Math.floor(osuTimeLeft - delta)) document.getElementById('osuTimerText').innerText = Math.ceil(osuTimeLeft - delta);
-    osuTimeLeft -= delta; if (osuTimeLeft <= 0) { endOsuGame(); return; }
-    const canvas = document.getElementById('osuCanvas'); const ctx = canvas.getContext('2d'); 
-    ctx.clearRect(0, 0, 400, 500); 
-    ctx.strokeStyle = '#444'; ctx.lineWidth = 2; for(let i=1; i<4; i++) { ctx.beginPath(); ctx.moveTo(i*100, 0); ctx.lineTo(i*100, 500); ctx.stroke(); } 
-    ctx.fillStyle = 'rgba(0, 255, 0, 0.2)'; ctx.fillRect(0, 400, 400, 50); 
-    ctx.lineWidth = 4; ctx.strokeStyle = 'white'; for(let i=0; i<4; i++) { if(osuLaneFlash[i] > 0) { ctx.strokeRect(i * 100 + 2, 400, 96, 50); osuLaneFlash[i]--; } }
-    if(Math.random() < 2.5 * delta) { let lane = Math.floor(Math.random() * 4); osuNotes.push({lane: lane, y: -20, hit: false}); } 
-    const noteSpeed = 300; 
-    for(let i = osuNotes.length - 1; i >= 0; i--) { 
-        let note = osuNotes[i]; note.y += noteSpeed * delta; 
-        if(!note.hit) { ctx.fillStyle = 'red'; ctx.fillRect(note.lane * 100 + 10, note.y, 80, 20); } 
-        if(note.y > 500) { if(!note.hit) osuTotal++; osuNotes.splice(i, 1); updateOsuAccuracy(); } 
-    } 
-    requestAnimationFrame(osuLoop);
-}
-
-function handleOsuInput(lane) { for(let note of osuNotes) { if(note.lane === lane && !note.hit && note.y > 380 && note.y < 460) { note.hit = true; osuHits++; osuTotal++; updateOsuAccuracy(); return; } } }
-function updateOsuAccuracy() { if(osuTotal === 0) return; let acc = Math.round((osuHits / osuTotal) * 100); document.getElementById('osuAcc').innerText = acc; if(osuTotal > 10 && acc < 85) { endOsuGame(false); } }
-
-function endOsuGame(forcedFail = null) { 
-    osuGameActive = false; document.getElementById('osuOverlay').style.display = 'none'; isHiding = false; 
-    velocity.set(0, 0, 0); controls.lock(); 
-    let acc = osuTotal === 0 ? 100 : Math.round((osuHits / osuTotal) * 100); 
-    if(forcedFail !== false && acc >= 85) { } else { bushCooldownTime = 180; document.getElementById('uiBushCD').style.display = 'block'; triggerAggro(); alert("Za dużo błędów! Narobiłeś hałasu w krzakach!"); } 
-}
-
-let currentTimer; function triggerPuzzle(id, obj) { controls.unlock(); if(obj) { scene.remove(obj); } buttonsFound++; document.getElementById('btnCount').innerText = buttonsFound; if(buttonsFound >= 3) door.visible = true; if(id === "1") { document.getElementById('puzzle1').style.display = 'block'; new Audio(assets.puzzle1Sound).play(); startTimer(1, 20); } else if(id === "2") { document.getElementById('puzzle2').style.display = 'block'; let vid = document.getElementById('puzzleVideo'); vid.src = assets.puzzle2Video; vid.play(); startTimer(2, 20); } else if(id === "3") { document.getElementById('puzzle3').style.display = 'block'; } } function startTimer(puzzleId, timeLimit) { let timeLeft = timeLimit; document.getElementById('timer'+puzzleId).innerText = timeLeft; currentTimer = setInterval(() => { timeLeft--; document.getElementById('timer'+puzzleId).innerText = timeLeft; if(timeLeft <= 0) { clearInterval(currentTimer); failPuzzle(puzzleId); } }, 1000); } function solvePuzzle1() { let ans = document.getElementById('ans1').value.toLowerCase(); clearInterval(currentTimer); document.getElementById('puzzle1').style.display = 'none'; controls.lock(); if(ans !== "supercalifragilisticexpialidocious") triggerAggro(); } function solvePuzzle2() { let ans = document.getElementById('ans2').value.toLowerCase(); clearInterval(currentTimer); document.getElementById('puzzleVideo').pause(); document.getElementById('puzzle2').style.display = 'none'; controls.lock(); if(ans !== "congregation") triggerAggro(); } function failPuzzle(id) { document.getElementById('puzzle'+id).style.display = 'none'; controls.lock(); triggerAggro(); } function triggerAggro() { isAggro = true; agroAudio.play(); setTimeout(() => { isAggro = false; agroAudio.stop(); }, 15000); }
-
-let gdGameActive = false; let gdLastTime = 0; let gdTimeLeft = 10; let gdY = 150; let gdIsHolding = false; let gdObstacles = []; let gdTrail = [];
-
-function startGD() { 
-    document.getElementById('startGdBtn').style.display = 'none'; document.getElementById('gdCanvas').style.display = 'block'; const canvas = document.getElementById('gdCanvas'); 
-    gdGameActive = true; gdY = 150; gdIsHolding = false; gdObstacles = []; gdTrail = []; gdTimeLeft = 10; document.getElementById('timer3').innerText = gdTimeLeft;
-    const startHold = () => gdIsHolding = true; const endHold = () => gdIsHolding = false;
-    canvas.onmousedown = startHold; canvas.onmouseup = endHold;
-    gdLastTime = performance.now(); requestAnimationFrame(gdLoop);
-}
-
-function gdLoop(time) {
-    if (!gdGameActive) return;
-    let delta = (time - gdLastTime) / 1000; gdLastTime = time;
-    if (Math.floor(gdTimeLeft) > Math.floor(gdTimeLeft - delta)) document.getElementById('timer3').innerText = Math.ceil(gdTimeLeft - delta);
-    gdTimeLeft -= delta; if(gdTimeLeft <= 0) { gdGameActive = false; document.getElementById('puzzle3').style.display = 'none'; controls.lock(); return; }
-    const canvas = document.getElementById('gdCanvas'); const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,400,300); 
-    const waveSpeedY = 300 * delta; if(gdIsHolding) gdY -= waveSpeedY; else gdY += waveSpeedY; 
-    const waveX = 57.5; const waveY = gdY + 7.5; 
-    gdTrail.push({x: waveX, y: waveY}); if(gdTrail.length > 20) gdTrail.shift(); 
-    const obstacleSpeed = 350 * delta;
-    ctx.beginPath(); for(let i=0; i<gdTrail.length; i++) { let point = gdTrail[i]; let trailX = point.x - (gdTrail.length - i) * (obstacleSpeed * 0.05); if(i === 0) ctx.moveTo(trailX, point.y); else ctx.lineTo(trailX, point.y); } ctx.strokeStyle = 'rgba(255, 255, 0, 0.4)'; ctx.lineWidth = 3; ctx.stroke(); 
-    ctx.save(); ctx.translate(waveX, waveY); ctx.rotate(gdIsHolding ? -Math.PI/4 : Math.PI/4); ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.moveTo(-7.5, -7.5); ctx.lineTo(7.5, 0); ctx.lineTo(-7.5, 7.5); ctx.fill(); ctx.restore(); 
-    if (waveY <= 0 || waveY >= 300) { gdGameActive = false; failPuzzle(3); return; } 
-    if(Math.random() < 1.8 * delta) { let isTop = Math.random() < 0.5; let h = 50 + Math.random() * 110; gdObstacles.push({x: 400, y: isTop ? 0 : 300 - h, w: 25, h: h}); } 
-    ctx.fillStyle = 'red'; const hitRadius = 3; 
-    for(let i = gdObstacles.length - 1; i >= 0; i--) { 
-        let obs = gdObstacles[i]; obs.x -= obstacleSpeed; ctx.fillRect(obs.x, obs.y, obs.w, obs.h); 
-        if(waveX + hitRadius > obs.x && waveX - hitRadius < obs.x + obs.w && waveY + hitRadius > obs.y && waveY - hitRadius < obs.y + obs.h) { gdGameActive = false; failPuzzle(3); return; } 
-        if(obs.x + obs.w < 0) gdObstacles.splice(i, 1); 
-    } 
+// MINIGRY (GD & OSU)
+let gdActive=false, gdTime=10, gdY=150, gdHold=false, gdObs=[], gdTrail=[];
+function startGD(){ document.getElementById('startGdBtn').style.display='none'; document.getElementById('gdCanvas').style.display='block'; gdActive=true; gdY=150; gdTime=10; gdObs=[]; gdTrail=[]; requestAnimationFrame(gdLoop); const c=document.getElementById('gdCanvas'); c.onmousedown=()=>gdHold=true; c.onmouseup=()=>gdHold=false;}
+function gdLoop(){ if(!gdActive)return; gdTime-=0.016; if(gdTime<=0){gdActive=false; document.getElementById('puzzle3').style.display='none'; controls.lock(); return;}
+    document.getElementById('timer3').innerText=Math.ceil(gdTime); const ctx=document.getElementById('gdCanvas').getContext('2d'); ctx.clearRect(0,0,400,300);
+    gdY+=(gdHold?-5:5); gdTrail.push({x:60,y:gdY}); if(gdTrail.length>20)gdTrail.shift();
+    ctx.beginPath(); gdTrail.forEach((p,i)=>{if(i==0)ctx.moveTo(p.x-(20-i)*5,p.y);else ctx.lineTo(p.x-(20-i)*5,p.y);}); ctx.strokeStyle='yellow'; ctx.stroke();
+    if(gdY<0||gdY>300){gdActive=false; failPuzzle(3); return;}
+    if(Math.random()<0.03) gdObs.push({x:400,y:Math.random()<0.5?0:200,h:100});
+    gdObs.forEach((o,i)=>{o.x-=5; ctx.fillStyle='red'; ctx.fillRect(o.x,o.y,30,o.h); if(60>o.x && 60<o.x+30 && gdY>o.y && gdY<o.y+o.h){gdActive=false; failPuzzle(3);} });
     requestAnimationFrame(gdLoop);
 }
 
-function closeShop() { document.getElementById('shop').style.display = 'none'; controls.lock(); } function buySpeed() { if(coinsCollected >= 10) { coinsCollected -= 10; document.getElementById('coinCount').innerText = coinsCollected; speedTimeLeft = 60; document.getElementById('uiSpeed').style.display = 'block'; closeShop(); } else { document.getElementById('shopWarning').style.display = 'block'; } } function buyTracker() { if(coinsCollected >= 10) { coinsCollected -= 10; document.getElementById('coinCount').innerText = coinsCollected; trackerTimeLeft = 10; nextbotMat.color.setHex(0xff0000); nextbotMat.depthTest = false; document.getElementById('uiTracker').style.display = 'block'; closeShop(); } else { document.getElementById('shopWarning').style.display = 'block'; } } function showWarningText() { const d = document.createElement('div'); d.innerText = "Good luck..."; d.style.position = 'absolute'; d.style.color = 'red'; d.style.fontSize = '50px'; d.style.top = '100px'; d.style.left = '50%'; d.style.transform = 'translateX(-50%)'; d.style.zIndex = 100; document.body.appendChild(d); setTimeout(() => d.remove(), 3000); }
-
-function triggerRealJumpscare() { gameWon = false; controls.unlock(); stopAllGameSounds(); document.getElementById('gameJumpscare').style.display = 'block'; let realJumpscareSnd = document.getElementById('sndRealJumpscare'); realJumpscareSnd.volume = 1.0; let screamPromise = realJumpscareSnd.play(); if(screamPromise !== undefined) screamPromise.catch(e => console.warn("Brak dźwięku")); setTimeout(() => { document.getElementById('gameJumpscare').style.display = 'none'; document.getElementById('endTitle').innerText = "ZŁAPANY!"; document.getElementById('endSubtitle').innerText = "Nextbot cię dopadł."; document.getElementById('endScreen').style.display = 'block'; }, 2000); } function winGame() { gameWon = true; controls.unlock(); stopAllGameSounds(); document.getElementById('endScreen').style.display = 'block'; if(isSecretMode) { document.getElementById('endTitle').innerText = "SECRET ENDING"; document.getElementById('endSubtitle').innerText = "Przetrwałeś koszmar."; } }
-
-let extraNextbots = []; 
-function checkSecret() { 
-    const code = document.getElementById('secretCode').value; 
-    if (code === "...") {
-        isAggro = true; 
-        alert("⚠️ CHAOS MODE ACTIVATED: 10 NEXTBOTÓW!");
-        for(let i=0; i<9; i++) {
-            let clone = nextbot.clone();
-            let rx = (Math.random() - 0.5) * 1000;
-            let rz = (Math.random() - 0.5) * 1000;
-            clone.position.set(rx, 0, rz);
-            scene.add(clone);
-            extraNextbots.push(clone);
-        }
-    }
-    else if(code === "81ZJA") { 
-        isSecretMode = true; 
-        if(nextbotAudio.isPlaying) nextbotAudio.stop();
-        if(agroAudio.isPlaying) agroAudio.stop();
-        assets.nextbotImg = 'nextbot2.png'; 
-        assets.nextbotSound = 'nextbotsound2.mp3'; 
-        assets.agroSound = 'agro2.mp3'; 
-        textureLoader.load(assets.nextbotImg, function(tex) { 
-            nextbotMat.map = tex; 
-            let ar = tex.image.width / tex.image.height; 
-            nextbot.scale.set(6 * ar, 6, 1); 
-            extraNextbots.forEach(clone => { clone.material = nextbotMat; clone.scale.set(6 * ar, 6, 1); });
-        }); 
-        audioLoader.load(assets.nextbotSound, function(buffer) { 
-            nextbotAudio.setBuffer(buffer); 
-            nextbotAudio.setRefDistance(25); 
-            if(gameStarted) nextbotAudio.play(); 
-        }, undefined, function(err) { console.log("Brak pliku"); }); 
-        audioLoader.load(assets.agroSound, function(buffer) { agroAudio.setBuffer(buffer); }); 
-        alert("SECRET MODE ACTIVATED: DIFFICULTY EXTREME"); 
-    } 
+let osuActive=false, osuTime=15, osuNotes=[], osuHits=0, osuTotal=0;
+function startOsuGame() { controls.unlock(); isHiding=true; document.getElementById('osuOverlay').style.display='block'; osuNotes=[]; osuHits=0; osuTotal=0; osuTime=15; osuActive=true; requestAnimationFrame(osuLoop); }
+function osuLoop(){ if(!osuActive)return; osuTime-=0.016; if(osuTime<=0) endOsu();
+    document.getElementById('osuTimerText').innerText=Math.ceil(osuTime); const ctx=document.getElementById('osuCanvas').getContext('2d'); ctx.clearRect(0,0,400,500);
+    ctx.strokeStyle='#444'; for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(i*100,0);ctx.lineTo(i*100,500);ctx.stroke();}
+    ctx.fillStyle='#004400'; ctx.fillRect(0,400,400,50);
+    if(Math.random()<0.04) osuNotes.push({l:Math.floor(Math.random()*4),y:-20,hit:false});
+    osuNotes.forEach(n=>{n.y+=5; if(!n.hit){ctx.fillStyle='red'; ctx.fillRect(n.l*100+10,n.y,80,20);} if(n.y>500 && !n.hit){osuTotal++;n.hit=true;updOsu();}});
+    requestAnimationFrame(osuLoop);
 }
+function handleOsuInput(l){ for(let n of osuNotes){if(n.l===l && !n.hit && n.y>380 && n.y<460){n.hit=true; osuHits++; osuTotal++; updOsu(); return;}} }
+function updOsu(){ let acc=osuTotal==0?100:Math.round(osuHits/osuTotal*100); document.getElementById('osuAcc').innerText=acc; if(osuTotal>10 && acc<85) endOsu(false); }
+function endOsu(success=true){ osuActive=false; document.getElementById('osuOverlay').style.display='none'; isHiding=false; controls.lock(); if(!success){bushCooldownTime=180; triggerAggro(); alert("Za głośno!");} }
+
+// SKLEP I BUFFY
+function closeShop() { document.getElementById('shop').style.display='none'; controls.lock(); }
+function buySpeed() { if(coinsCollected>=10){coinsCollected-=10; document.getElementById('coinCount').innerText=coinsCollected; speedTimeLeft=60; closeShop();} else document.getElementById('shopWarning').style.display='block'; }
+function buyTracker() { if(coinsCollected>=10){coinsCollected-=10; document.getElementById('coinCount').innerText=coinsCollected; trackerTimeLeft=10; closeShop();} else document.getElementById('shopWarning').style.display='block'; }
+
+function winGame() { gameWon=true; controls.unlock(); stopAllGameSounds(); document.getElementById('endScreen').style.display='block'; if(isSecretMode) document.getElementById('endTitle').innerText="SEKRETNE ZWYCIĘSTWO"; }
+function triggerRealJumpscare() { gameWon=false; controls.unlock(); stopAllGameSounds(); document.getElementById('gameJumpscare').style.display='block'; document.getElementById('sndRealJumpscare').play(); setTimeout(()=>{document.getElementById('gameJumpscare').style.display='none'; document.getElementById('endScreen').innerText="ZŁAPANY!"; document.getElementById('endScreen').style.display='block';}, 2000); }
 
 // --- PĘTLA GRY ---
 let prevTime = performance.now();
-let gracePeriod = 5.0; // 5 SEKUND NIETYKALNOŚCI NA STARCIE (FIX BŁĘDU)
+let gracePeriod = 5.0; // 5 sekundy spokoju na start
 
 function animate() {
-    requestAnimationFrame(animate); const time = performance.now(); const delta = (time - prevTime) / 1000;
-    if (speedTimeLeft > 0) { speedTimeLeft -= delta; speedMult = 2.0; document.getElementById('speedTimeText').innerText = Math.ceil(speedTimeLeft); if (speedTimeLeft <= 0) { speedTimeLeft = 0; speedMult = 1.0; document.getElementById('uiSpeed').style.display = 'none'; } }
-    if (trackerTimeLeft > 0) { trackerTimeLeft -= delta; document.getElementById('trackerTimeText').innerText = Math.ceil(trackerTimeLeft); if (trackerTimeLeft <= 0) { trackerTimeLeft = 0; nextbotMat.color.setHex(0xffffff); nextbotMat.depthTest = true; document.getElementById('uiTracker').style.display = 'none'; } }
-    if (bushCooldownTime > 0) { bushCooldownTime -= delta; document.getElementById('bushTimeText').innerText = Math.ceil(bushCooldownTime); if (bushCooldownTime <= 0) { bushCooldownTime = 0; document.getElementById('uiBushCD').style.display = 'none'; } }
+    requestAnimationFrame(animate); const time = performance.now(); const delta = (time - prevTime) / 1000; prevTime = time;
+    if(speedTimeLeft>0){speedTimeLeft-=delta; speedMult=2.0; document.getElementById('uiSpeed').style.display='block'; if(speedTimeLeft<=0){speedMult=1.0; document.getElementById('uiSpeed').style.display='none';}}
+    if(trackerTimeLeft>0){trackerTimeLeft-=delta; nextbotMat.depthTest=false; document.getElementById('uiTracker').style.display='block'; if(trackerTimeLeft<=0){nextbotMat.depthTest=true; document.getElementById('uiTracker').style.display='none';}}
+    if(bushCooldownTime>0){bushCooldownTime-=delta; document.getElementById('uiBushCD').style.display='block'; if(bushCooldownTime<=0) document.getElementById('uiBushCD').style.display='none';}
 
-    if (controls.isLocked === true && !isHiding) {
-        velocity.x -= velocity.x * 10.0 * delta; velocity.z -= velocity.z * 10.0 * delta;
-        direction.z = Number(moveForward) - Number(moveBackward); direction.x = Number(moveRight) - Number(moveLeft); direction.normalize();
-        let baseMove = isSprinting ? 55.0 : 35.0; let finalMoveSpeed = baseMove * speedMult; 
-        let moveX = 0; let moveZ = 0; 
-        if (moveForward || moveBackward) moveZ = -direction.z * finalMoveSpeed * delta; 
-        if (moveLeft || moveRight) moveX = -direction.x * finalMoveSpeed * delta; 
-        velocity.x += moveX; velocity.z += moveZ;
-        controls.moveRight(-velocity.x * delta); controls.moveForward(-velocity.z * delta);
-        velocityY += gravity * delta; camera.position.y += velocityY * delta;
-    
-        // Kolizje z terenem
-        let groundHeight = getTerrainHeight(camera.position.x, camera.position.z); let playerHeight = 1.6;
-        if (camera.position.y < groundHeight + playerHeight) { camera.position.y = groundHeight + playerHeight; velocityY = 0; canJump = true; }
+    if(controls.isLocked && !isHiding) {
+        // Ruch Gracza
+        velocity.x -= velocity.x * 10.0 * delta; velocity.z -= velocity.z * 10.0 * delta; velocity.y -= 30.0 * delta;
+        direction.z = Number(moveF) - Number(moveB); direction.x = Number(moveR) - Number(moveL); direction.normalize();
+        let spd = (isSprinting ? 55.0 : 35.0) * speedMult;
+        if(moveF || moveB) velocity.z -= direction.z * spd * delta; if(moveL || moveR) velocity.x -= direction.x * spd * delta;
+        controls.moveRight(-velocity.x * delta); controls.moveForward(-velocity.z * delta); camera.position.y += velocity.y * delta;
+        
+        // Kolizja teren
+        let gh = getTerrainHeight(camera.position.x, camera.position.z);
+        if(camera.position.y < gh + 1.6) { velocity.y=0; camera.position.y=gh+1.6; canJump=true; }
 
-        // Drzewa kolizje
-        let currentGridKey = getGridKey(camera.position.x, camera.position.z);
-        let treesToCheck = treeCollisionGrid[currentGridKey] || [];
-        for(let step = 0; step < 3; step++) {
-            for(let i = 0; i < treesToCheck.length; i++) {
-                let tree = treesToCheck[i]; let dx = camera.position.x - tree.x; let dz = camera.position.z - tree.z; let distSq = dx * dx + dz * dz;
-                if(distSq < tree.radius * tree.radius) { let dist = Math.sqrt(distSq); if(dist === 0) dist = 0.001; let overlap = tree.radius - dist; camera.position.x += (dx / dist) * overlap; camera.position.z += (dz / dist) * overlap; }
-            }
+        // Kolizja Drzewa
+        let key = getGridKey(camera.position.x, camera.position.z);
+        let trees = treeCollisionGrid[key] || [];
+        for(let t of trees) {
+            let dx=camera.position.x-t.x; let dz=camera.position.z-t.z; let d=Math.sqrt(dx*dx+dz*dz);
+            if(d<t.r) { let p=(t.r-d)/d; camera.position.x+=dx*p; camera.position.z+=dz*p; }
         }
 
-        // --- OBSŁUGA NEXTBOTA (Z GRACE PERIOD) ---
-        if(gracePeriod > 0) {
-            gracePeriod -= delta;
-        } else {
-            let currentBaseSpeed = isSecretMode ? 14.0 : 4.5; 
-            let currentAgroSpeed = isSecretMode ? 30.0 : 10.0; 
-            let botSpeed = isAggro ? currentAgroSpeed : currentBaseSpeed; 
-            
-            const moveBot = (bot) => {
-                let botToPlayer = new THREE.Vector3().subVectors(camera.position, bot.position); 
-                botToPlayer.y = 0; botToPlayer.normalize();
-                bot.position.addScaledVector(botToPlayer, botSpeed * delta);
-                bot.position.y = getTerrainHeight(bot.position.x, bot.position.z) + 2.2; 
-                if(bot.position.distanceTo(camera.position) < 2) { triggerRealJumpscare(); }
-            };
-
-            moveBot(nextbot);
-            extraNextbots.forEach(clone => moveBot(clone));
+        // NEXTBOT AI
+        if(gracePeriod > 0) gracePeriod -= delta;
+        else {
+            let bs = isAggro ? (isSecretMode?30:10) : (isSecretMode?14:4.5);
+            let vec = new THREE.Vector3().subVectors(camera.position, nextbot.position); vec.y=0; vec.normalize();
+            nextbot.position.addScaledVector(vec, bs*delta);
+            nextbot.position.y = getTerrainHeight(nextbot.position.x, nextbot.position.z) + 2.2;
+            if(nextbot.position.distanceTo(camera.position) < 2) triggerRealJumpscare();
         }
         
-        coins.forEach(coinGroup => coinGroup.rotation.y += delta * 2);
+        coinGroups.forEach(c => c.rotation.y += delta*2);
     }
     
-    if (isHiding) { 
-        nextbot.position.y = getTerrainHeight(nextbot.position.x, nextbot.position.z) + 2.2; 
-        extraNextbots.forEach(clone => clone.position.y = getTerrainHeight(clone.position.x, clone.position.z) + 2.2);
-    }
-
-    prevTime = time; renderer.render(scene, camera);
+    if(isHiding) { nextbot.position.y = getTerrainHeight(nextbot.position.x, nextbot.position.z)+2.2; }
+    renderer.render(scene, camera);
 }
+animate();
 </script>
 </body>
 </html>
